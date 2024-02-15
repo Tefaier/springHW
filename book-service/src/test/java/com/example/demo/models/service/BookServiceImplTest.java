@@ -1,7 +1,10 @@
-package com.example.models.service;
+package com.example.demo.models.service;
 
-import com.example.models.entity.Book;
-import com.example.models.repository.BookRepositoryInMemory;
+import com.example.demo.models.entity.Book;
+import com.example.demo.models.repository.BookRepositoryInMemory;
+import com.example.demo.models.service.BookService;
+import com.example.demo.models.service.BookServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class BookServiceImplTest {
   @Autowired
   private BookService bookService;
+
+  @BeforeEach
+  void cleanInfo() {
+    bookService.getAll().forEach(book -> bookService.delete(book));
+  }
 
   @Test
   void simpleCommandTest() {

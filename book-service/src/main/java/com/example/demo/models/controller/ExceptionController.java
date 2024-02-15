@@ -1,4 +1,4 @@
-package com.example.models.controller;
+package com.example.demo.models.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;

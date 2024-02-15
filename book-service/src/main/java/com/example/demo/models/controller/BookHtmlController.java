@@ -1,6 +1,6 @@
-package com.example.models.controller;
+package com.example.demo.models.controller;
 
-import com.example.models.service.BookService;
+import com.example.demo.models.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;

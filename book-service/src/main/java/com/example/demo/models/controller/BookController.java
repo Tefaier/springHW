@@ -1,20 +1,16 @@
-package com.example.models.controller;
+package com.example.demo.models.controller;
 
-import com.example.models.entity.Book;
-import com.example.models.entity.BookCreateRequest;
-import com.example.models.entity.BookUpdateRequest;
-import com.example.models.service.BookService;
+import com.example.demo.models.service.BookService;
+import com.example.demo.models.entity.Book;
+import com.example.demo.models.entity.BookCreateRequest;
+import com.example.demo.models.entity.BookUpdateRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.ui.Model;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api")

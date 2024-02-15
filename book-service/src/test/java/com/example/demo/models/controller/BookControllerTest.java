@@ -1,9 +1,10 @@
-package com.example.models.controller;
+package com.example.demo.models.controller;
 
-import com.example.models.entity.Book;
-import com.example.models.entity.BookCreateRequest;
-import com.example.models.entity.BookUpdateRequest;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.example.demo.models.entity.Book;
+import com.example.demo.models.entity.BookCreateRequest;
+import com.example.demo.models.entity.BookUpdateRequest;
+import com.example.demo.models.service.BookService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,9 +14,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
-import java.sql.Array;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +24,13 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class BookControllerTest {
   @Autowired
   private TestRestTemplate rest;
+  @Autowired
+  private BookService bookService;
+
+  @BeforeEach
+  void cleanInfo() {
+    bookService.getAll().forEach(book -> bookService.delete(book));
+  }
 
   @Test
   void bookAddTest() {

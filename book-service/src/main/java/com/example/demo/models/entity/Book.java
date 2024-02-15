@@ -1,4 +1,4 @@
-package com.example.models.entity;
+package com.example.demo.models.entity;
 
 import java.util.Objects;
 import java.util.Set;

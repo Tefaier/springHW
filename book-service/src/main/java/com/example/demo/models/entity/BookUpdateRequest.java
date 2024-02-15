@@ -1,18 +1,23 @@
-package com.example.models.entity;
+package com.example.demo.models.entity;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BookCreateRequest {
-  @NotBlank(message = "Book author has to be filled")
+public class BookUpdateRequest {
+  // to accept null but not empty String
+  @Size(min=1, message = "Book author can't be empty")
   private String author;
-  @NotBlank(message = "Book title has to be filled")
+  @Size(min=1, message = "Book title can't be empty")
   private String title;
   private Set<String> tags;
 
-  public BookCreateRequest(String author, String title, Set<String> tags) {
+  public BookUpdateRequest(String author, String title, Set<String> tags) {
     this.author = author;
     this.title = title;
     this.tags = tags;
