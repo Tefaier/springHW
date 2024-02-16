@@ -1,7 +1,13 @@
 package com.example.demo.models.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class Book {
   public final Long id;
@@ -16,7 +22,15 @@ public class Book {
     this.tags = tags;
   }
 
-  private Book (Long id, String author, String title, Set<String> tags) {
+  public String getTagsString() {
+    return String.join(" | ", tags);
+  }
+
+  @JsonCreator
+  private Book (@JsonProperty("id") Long id,
+                @JsonProperty("author") String author,
+                @JsonProperty("title") String title,
+                @JsonProperty("tags") Set<String> tags) {
     this.id = id;
     this.author = author;
     this.title = title;

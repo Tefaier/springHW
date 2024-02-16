@@ -19,7 +19,7 @@
         <td th:text="${book.id}"></td>
         <td th:text="${book.author}"></td>
         <td th:text="${book.title}"></td>
-        <td th:text="${#string.listJoin(tags, ', ')}"></td>
+        <td th:text="${book.getTagsString()}"></td>
     </tr>
     </tbody>
 </table>

@@ -6,6 +6,7 @@ import com.example.demo.models.entity.BookCreateRequest;
 import com.example.demo.models.entity.BookUpdateRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class BookController {
   }
 
   @PutMapping("/books/{id}")
-  public void updateBook(@NotNull @PathVariable("id") Long id,
+  public Book updateBook(@NotNull @PathVariable("id") Long id,
                          @Valid @RequestBody BookUpdateRequest update) {
     Book book = bookService.getById(id).orElseThrow();
     if (update.getAuthor() != null) {
@@ -41,7 +42,7 @@ public class BookController {
     if (update.getTags() != null) {
       book = book.withTags(update.getTags());
     }
-    bookService.update(book);
+    return bookService.update(book);
   }
 
   @GetMapping("/books/{id}")
@@ -49,8 +50,11 @@ public class BookController {
     return bookService.getById(id).orElseThrow();
   }
 
-  @GetMapping("/books/{tag}")
-  public List<Book> getBooksByTag(@NotNull @PathVariable("tag") String tag) {
+  @GetMapping("/books/search")
+  public List<Book> getBooksByTag(@Size(min=1) @RequestParam(value = "tag", required = false) String tag) {
+    if (tag == null) {
+      return bookService.getAll();
+    }
     return bookService.getWithTag(tag);
   }
 
