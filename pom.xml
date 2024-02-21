@@ -10,6 +10,8 @@
 
     <modules>
         <module>book-service</module>
+        <module>author-book-ORM</module>
     </modules>
+
 
 </project>
