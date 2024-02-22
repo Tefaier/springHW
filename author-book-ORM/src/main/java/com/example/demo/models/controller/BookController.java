@@ -32,17 +32,7 @@ public class BookController {
   @PutMapping("/books/{id}")
   public Book updateBook(@NotNull @PathVariable("id") Long id,
                          @Valid @RequestBody BookUpdateRequest update) {
-    Book book = bookService.getById(id).orElseThrow();
-    if (update.getAuthor() != null) {
-      book = book.withAuthor(update.getAuthor());
-    }
-    if (update.getTitle() != null) {
-      book = book.withTitle(update.getTitle());
-    }
-    if (update.getTags() != null) {
-      book = book.withTags(update.getTags());
-    }
-    return bookService.update(book);
+    return bookService.update(id, update);
   }
 
   @GetMapping("/books/{id}")

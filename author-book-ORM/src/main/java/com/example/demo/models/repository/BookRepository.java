@@ -1,14 +1,9 @@
 package com.example.demo.models.repository;
 
 import com.example.demo.models.entity.Book;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface BookRepository {
-  public List<Book> getAll();
-  public Optional<Book> getById(Long id);
-  public List<Book> getByTag(String tag);
-  public Book addOrReplace(Book book);
-  public void delete(Book book);
+@Repository
+public interface BookRepository extends JpaRepository<Book, Long> {
 }

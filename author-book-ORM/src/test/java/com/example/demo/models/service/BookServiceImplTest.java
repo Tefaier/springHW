@@ -1,9 +1,6 @@
 package com.example.demo.models.service;
 
 import com.example.demo.models.entity.Book;
-import com.example.demo.models.repository.BookRepositoryInMemory;
-import com.example.demo.models.service.BookService;
-import com.example.demo.models.service.BookServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

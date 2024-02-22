@@ -2,6 +2,9 @@ package com.example.demo.models.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.data.annotation.Id;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,48 +12,68 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+@Entity
+@Table(name = "books")
 public class Book {
-  public final Long id;
-  public final String author;
-  public final String title;
-  public final Set<String> tags;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
+  public Long id;
 
-  public Book (String author, String title, Set<String> tags) {
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "author_id")
+  public Author author;
+
+  @Column
+  @NotNull(message = "Book title has to be filled")
+  public String title;
+
+  @Column
+  public Set<Tag> tags;
+
+  protected Book() {}
+
+  public Book (Author author, String title, Set<Tag> tags) {
     this.id = null;
     this.author = author;
     this.title = title;
     this.tags = tags;
   }
 
-  public String getTagsString() {
-    return String.join(" | ", tags);
+  public Long getId() {
+    return id;
   }
 
-  @JsonCreator
-  private Book (@JsonProperty("id") Long id,
-                @JsonProperty("author") String author,
-                @JsonProperty("title") String title,
-                @JsonProperty("tags") Set<String> tags) {
-    this.id = id;
+  protected Long setId() {
+    return id;
+  }
+
+  public Author getAuthor() {
+    return author;
+  }
+
+  public void setAuthor(Author author) {
     this.author = author;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
     this.title = title;
+  }
+
+  public Set<Tag> getTags() {
+    return tags;
+  }
+
+  public void setTags(Set<Tag> tags) {
     this.tags = tags;
   }
 
-  public Book withId(long id) {
-    return new Book(id, this.author, this.title, this.tags);
-  }
-
-  public Book withAuthor(String author) {
-    return new Book(this.id, author, this.title, this.tags);
-  }
-
-  public Book withTitle(String title) {
-    return new Book(this.id, this.author, title, this.tags);
-  }
-
-  public Book withTags(Set<String> tags) {
-    return new Book(this.id, this.author, this.title, tags);
+  public String getTagsString() {
+    return String.join(" | ", tags.stream().map(tag -> tag.name).toList());
   }
 
   @Override
