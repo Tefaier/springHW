@@ -8,8 +8,13 @@ CREATE IF NOT EXISTS TABLE authors (
 CREATE IF NOT EXISTS TABLE books (
 		id     BIGSERIAL PRIMARY KEY,
 		author_id BIGINT REFERENCES authors (id),
-		title TEXT NOT NULL,
-		tags_id REFERENCES tags (id)
+		title TEXT NOT NULL
+);
+
+CREATE IF NOT EXISTS TABLE book_tag (
+		book_id BIGINT REFERENCES books (id) NOT NULL,
+    tag_id   BIGINT REFERENCES tags (id)   NOT NULL,
+    PRIMARY KEY (book_id, tag_id)
 );
 
 CREATE IF NOT EXISTS TABLE tags (

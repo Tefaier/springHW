@@ -6,30 +6,33 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "books")
 public class Book {
+  @Column
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column
-  public Long id;
+  private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "author_id")
-  public Author author;
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Author author;
 
   @Column
   @NotNull(message = "Book title has to be filled")
-  public String title;
+  private String title;
 
   @Column
-  public Set<Tag> tags;
+  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+  @JoinTable(
+      name = "book_tag",
+      joinColumns = @JoinColumn(name = "book_id"),
+      inverseJoinColumns = @JoinColumn(name = "tag_id")
+  )
+  private Set<Tag> tags = new HashSet<>();
 
   protected Book() {}
 
