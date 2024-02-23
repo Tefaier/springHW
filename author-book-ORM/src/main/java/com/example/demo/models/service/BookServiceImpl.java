@@ -1,6 +1,9 @@
 package com.example.demo.models.service;
 
+import com.example.demo.models.DTO.BookDTO;
+import com.example.demo.models.DTO.BookRequest;
 import com.example.demo.models.entity.Book;
+import com.example.demo.models.repository.AuthorRepository;
 import com.example.demo.models.repository.BookRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,52 +14,38 @@ import java.util.Optional;
 
 @Service
 public class BookServiceImpl implements BookService {
-  private final BookRepository bookRepository;
-
   @Autowired
-  public BookServiceImpl(BookRepository bookRepository) {
-    this.bookRepository = bookRepository;
+  private AuthorRepository authorRepository;
+  @Autowired
+  private BookRepository bookRepository;
+
+  @Override
+  public List<BookDTO> getAll() {
+    return null;
   }
 
   @Override
-  public List<Book> getAll() {
-    return bookRepository.findAll();
+  public Optional<BookDTO> getById(Long id) {
+    return Optional.empty();
   }
 
   @Override
-  public Optional<Book> getById(Long id) {
-    return bookRepository.findById(id);
+  public List<BookDTO> getWithTag(Long tagID) {
+    return null;
   }
 
   @Override
-  public List<Book> getWithTag(String tag) {
-    return bookRepository.getByTag(tag);
+  public BookDTO add(BookRequest request) {
+    return null;
   }
 
   @Override
-  public Book add(Book book) {
-    if (book == null) { return null; }
-    return bookRepository.save(book);
+  public BookDTO update(Long id, BookRequest request) {
+    return null;
   }
 
   @Override
-  @Transactional
-  public Book update(Long id, BookUpdateRequest request) {
-    Book book = getById(id).orElseThrow();
-    if (request.getAuthor() != null) {
-      book.setAuthor(request.getAuthor());
-    }
-    if (request.getTitle() != null) {
-      book.setTitle(request.getTitle());
-    }
-    if (request.getTags() != null) {
-      book.setTags(request.getTags());
-    }
-    return bookRepository.save(book);
-  }
+  public void delete(Long id) {
 
-  @Override
-  public void delete(Book book) {
-    bookRepository.delete(book);
   }
 }

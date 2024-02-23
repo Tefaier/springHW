@@ -1,20 +1,21 @@
 package com.example.demo.models.DTO;
 
+import com.example.demo.models.entity.ChangeType;
 import jakarta.validation.constraints.Min;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BookRequest {
   private Long authorID;
   @Min(1)
   private String title;
-  private Set<Long> tags;
+  private Map<Long, ChangeType> tagCommands;
 
-  public BookRequest(Long authorID, String title, Set<Long> tags) {
+  public BookRequest(Long authorID, String title, Map<Long, ChangeType> tagCommands) {
     this.authorID = authorID;
     this.title = title;
-    this.tags = tags;
+    this.tagCommands = tagCommands;
   }
 
   public Long getAuthorID() {
@@ -25,10 +26,10 @@ public class BookRequest {
     return title;
   }
 
-  public Set<Long> getTags() {
-    if (tags == null) {
-      return new HashSet<>();
+  public Map<Long, ChangeType> getTags() {
+    if (tagCommands == null) {
+      return new HashMap<>();
     }
-    return tags;
+    return tagCommands;
   }
 }

@@ -29,7 +29,7 @@ public class Author {
   private String lastName;
 
   @Column(name = "books_id")
-  @OneToMany(mappedBy = "author", orphanRemoval = false, fetch = FetchType.LAZY, cascade = {PERSIST})
+  @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.LAZY, cascade = {PERSIST})
   private List<Book> books = new ArrayList<>();
 
   protected Author () {}
