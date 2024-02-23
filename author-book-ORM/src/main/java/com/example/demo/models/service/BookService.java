@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookService {
-  public List<BookDTO> getAll();
-  public Optional<BookDTO> getById(Long id);
+  public List<BookDTO> getAll(boolean withTags);
+  public Optional<BookDTO> getById(Long id, boolean withTags);
   public List<BookDTO> getWithTag(Long tagID);
   public BookDTO add(BookRequest request);
   public BookDTO update(Long id, BookRequest request);

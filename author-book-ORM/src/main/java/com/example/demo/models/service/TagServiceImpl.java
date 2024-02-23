@@ -2,7 +2,11 @@ package com.example.demo.models.service;
 
 import com.example.demo.models.DTO.TagDTO;
 import com.example.demo.models.DTO.TagRequest;
+import com.example.demo.models.DTO.TagDTO;
+import com.example.demo.models.DTO.TagRequest;
+import com.example.demo.models.entity.Tag;
 import com.example.demo.models.repository.TagRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,26 +20,34 @@ public class TagServiceImpl implements TagService{
 
   @Override
   public List<TagDTO> getAll() {
-    return null;
+    return tagRepository.findAll().stream().map(Tag::getDTO).toList();
   }
 
   @Override
   public Optional<TagDTO> getById(Long id) {
-    return Optional.empty();
+    return tagRepository.findById(id).map(Tag::getDTO);
   }
 
   @Override
   public TagDTO add(TagRequest request) {
-    return null;
+    return Tag.getDTO(tagRepository.save(new Tag(request.getName(), null)));
   }
 
   @Override
+  @Transactional
   public TagDTO update(Long id, TagRequest request) {
-    return null;
+    Tag tag = tagRepository.findById(id).orElseThrow();
+    if (request.getName() != null) {
+      tag.setName(request.getName());
+    }
+    tagRepository.save(tag);
+    return Tag.getDTO(tag);
   }
 
   @Override
+  @Transactional
   public void delete(Long id) {
-
+    Tag tag = tagRepository.findById(id).orElseThrow();
+    tagRepository.delete(tag);
   }
 }

@@ -26,7 +26,7 @@ public class BookRequest {
     return title;
   }
 
-  public Map<Long, ChangeType> getTags() {
+  public Map<Long, ChangeType> getTagCommands() {
     if (tagCommands == null) {
       return new HashMap<>();
     }

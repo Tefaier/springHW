@@ -32,7 +32,7 @@ public class BookController {
 
   @PostMapping(path = "/books/add")
   public Book createBook(@Valid @RequestBody BookRequest book) {
-    return bookService.add(new Book(book.getAuthorID(), book.getTitle(), book.getTags()));
+    return bookService.add(new Book(book.getAuthorID(), book.getTitle(), book.getTagCommands()));
   }
 
   @PutMapping("/books/{id}")
