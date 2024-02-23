@@ -1,7 +1,6 @@
 package com.example.demo.models.service;
 
 import com.example.demo.models.entity.Book;
-import com.example.demo.models.entity.BookUpdateRequest;
 
 import java.util.List;
 import java.util.Optional;

@@ -2,8 +2,7 @@ package com.example.demo.models.controller;
 
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.entity.Book;
-import com.example.demo.models.entity.BookCreateRequest;
-import com.example.demo.models.entity.BookUpdateRequest;
+import com.example.demo.models.DTO.BookRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -12,6 +11,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+/*
+Создание, обновление, удаление Book (можно поправить с предыдущего урока).
+Создание, обновление, удаление Author.
+Создание, обновление, удаление Tag.
+Связка/удаление связки между Book и Author
+ */
 
 @RestController
 @RequestMapping("/api")
@@ -25,8 +31,8 @@ public class BookController {
   }
 
   @PostMapping(path = "/books/add")
-  public Book createBook(@Valid @RequestBody BookCreateRequest book) {
-    return bookService.add(new Book(book.getAuthor(), book.getTitle(), book.getTags()));
+  public Book createBook(@Valid @RequestBody BookRequest book) {
+    return bookService.add(new Book(book.getAuthorID(), book.getTitle(), book.getTags()));
   }
 
   @PutMapping("/books/{id}")

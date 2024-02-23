@@ -1,10 +1,12 @@
 package com.example.demo.models.entity;
 
+import com.example.demo.models.DTO.BookDTO;
+import com.example.demo.models.DTO.TagDTO;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.annotation.Id;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,7 +14,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "books")
 public class Book {
-  @Column
+  @Column(nullable = false, updatable = false)
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -71,17 +73,43 @@ public class Book {
     return tags;
   }
 
-  public void setTags(Set<Tag> tags) {
+  protected void setTags(Set<Tag> tags) {
     this.tags = tags;
   }
 
-  public String getTagsString() {
-    return String.join(" | ", tags.stream().map(tag -> tag.name).toList());
+  public void addTag(Tag tag) {
+    if (!tags.contains(tag)) {
+      this.tags.add(tag);
+    }
+  }
+
+  public void removeTag(Long tagID) {
+    this.tags.removeIf(tag -> Objects.equals(tag.getId(), tagID));
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (! (obj instanceof Book)) return false;
-    return Objects.equals(((Book) obj).id, this.id);
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null) return false;
+    Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) return false;
+    Book book = (Book) o;
+    return getId() != null && Objects.equals(getId(), book.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+  }
+
+  public static BookDTO getDTO(Book book, boolean withTags) {
+    return new BookDTO(
+        book.getId(),
+        book.getAuthor().getId(),
+        book.getTitle(),
+        withTags ?
+            book.getTags().stream().map(Tag::getDTO).collect(Collectors.toSet()) :
+            new HashSet<>());
   }
 }

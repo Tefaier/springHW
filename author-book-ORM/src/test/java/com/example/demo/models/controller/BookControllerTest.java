@@ -1,10 +1,8 @@
 package com.example.demo.models.controller;
 
 import com.example.demo.models.entity.Book;
-import com.example.demo.models.entity.BookCreateRequest;
-import com.example.demo.models.entity.BookUpdateRequest;
+import com.example.demo.models.DTO.BookRequest;
 import com.example.demo.models.service.BookService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +35,7 @@ class BookControllerTest {
         .toUriString();
   }
 
-  private ResponseEntity<Book> createRequest(BookCreateRequest bookCreateRequest) {
+  private ResponseEntity<Book> createRequest(BookRequest bookCreateRequest) {
     return rest.postForEntity(
         "/api/books/add",
         bookCreateRequest,
@@ -68,7 +65,7 @@ class BookControllerTest {
 
   @Test
   void bookAddTest() {
-    var createBookResponse = createRequest(new BookCreateRequest("Tefaier", "protocol", Set.of("fluff", "modern time")));
+    var createBookResponse = createRequest(new BookRequest("Tefaier", "protocol", Set.of("fluff", "modern time")));
     assertTrue(createBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createBookResponse.getStatusCode());
     Book createBookResponseBody = createBookResponse.getBody();
     assertNotNull(createBookResponseBody.id, "Book was returned without id");
@@ -98,15 +95,15 @@ class BookControllerTest {
 
   @Test
   void validationTest() {
-    var createBookResponse = createRequest(new BookCreateRequest("Test", "test", null));
+    var createBookResponse = createRequest(new BookRequest("Test", "test", null));
     assertTrue(createBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createBookResponse.getStatusCode());
     Long id = createBookResponse.getBody().id;
 
-    List<BookCreateRequest> createRequests = List.of(
-        new BookCreateRequest(null, "protocol", Set.of()),
-        new BookCreateRequest("", "protocol", Set.of()),
-        new BookCreateRequest("Tet", null, Set.of()),
-        new BookCreateRequest("Tet", "", Set.of()));
+    List<BookRequest> createRequests = List.of(
+        new BookRequest(null, "protocol", Set.of()),
+        new BookRequest("", "protocol", Set.of()),
+        new BookRequest("Tet", null, Set.of()),
+        new BookRequest("Tet", "", Set.of()));
     List<BookUpdateRequest> updateRequests = List.of(
         new BookUpdateRequest("", "protocol", Set.of()),
         new BookUpdateRequest("Tet", "", Set.of()));
@@ -126,7 +123,7 @@ class BookControllerTest {
   void htmlListTest() {
     String checkField = "All you need to know about lists";
 
-    var createBookResponse = createRequest(new BookCreateRequest("HTML", checkField, Set.of("Cool", "Hell")));
+    var createBookResponse = createRequest(new BookRequest("HTML", checkField, Set.of("Cool", "Hell")));
     assertTrue(createBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createBookResponse.getStatusCode());
     Long id = createBookResponse.getBody().id;
 
