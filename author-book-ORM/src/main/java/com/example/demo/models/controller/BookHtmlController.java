@@ -19,7 +19,7 @@ public class BookHtmlController {
 
   @GetMapping("/books")
   public String viewBooks(Model model) {
-    var books = bookService.getAll();
+    var books = bookService.getAll(true);
     model.addAttribute("books", books);
     return "books";
   }

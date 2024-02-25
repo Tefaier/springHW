@@ -1,11 +1,12 @@
 package com.example.demo.models.DTO;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 public class AuthorRequest {
-  @Min(1)
+  @Size(min = 1, message = "Имя не может быть пустым")
   private String firstName;
-  @Min(1)
+  @Size(min = 1, message = "Фамилия не может быть пустым")
   private String lastName;
 
   public AuthorRequest(String firstName, String lastName) {

@@ -46,6 +46,12 @@ public class BookServiceImpl implements BookService {
   }
 
   @Override
+  @Transactional
+  public List<BookDTO> getWithTag(String tagName) {
+    return getWithTag(tagRepository.findByName(tagName).orElseThrow().getId());
+  }
+
+  @Override
   public BookDTO add(BookRequest request) {
     return Book.getDTO(
         bookRepository.save(new Book(

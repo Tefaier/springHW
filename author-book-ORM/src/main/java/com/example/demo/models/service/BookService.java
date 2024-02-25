@@ -11,6 +11,7 @@ public interface BookService {
   public List<BookDTO> getAll(boolean withTags);
   public Optional<BookDTO> getById(Long id, boolean withTags);
   public List<BookDTO> getWithTag(Long tagID);
+  public List<BookDTO> getWithTag(String tagName);
   public BookDTO add(BookRequest request);
   public BookDTO update(Long id, BookRequest request);
   public void delete(Long id);

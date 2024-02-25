@@ -8,8 +8,8 @@
 <table>
     <thead>
     <tr>
-        <th>ID</th>
-        <th>Автор</th>
+        <th>ID книги</th>
+        <th>ID автора</th>
         <th>Название</th>
         <th>Теги</th>
     </tr>
@@ -17,7 +17,7 @@
     <tbody>
     <tr th:each="book:${books}">
         <td th:text="${book.id}"></td>
-        <td th:text="${book.author}"></td>
+        <td th:text="${book.authorID}"></td>
         <td th:text="${book.title}"></td>
         <td th:text="${book.getTagsString()}"></td>
     </tr>

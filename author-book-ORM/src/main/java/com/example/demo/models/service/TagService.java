@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface TagService {
   public List<TagDTO> getAll();
   public Optional<TagDTO> getById(Long id);
+  public Optional<TagDTO> getByName(String name);
   public TagDTO add(TagRequest request);
   public TagDTO update(Long id, TagRequest request);
   public void delete(Long id);

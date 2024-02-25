@@ -4,6 +4,7 @@ import com.example.demo.models.DTO.TagDTO;
 import com.example.demo.models.DTO.TagRequest;
 import com.example.demo.models.DTO.TagDTO;
 import com.example.demo.models.DTO.TagRequest;
+import com.example.demo.models.entity.Book;
 import com.example.demo.models.entity.Tag;
 import com.example.demo.models.repository.TagRepository;
 import jakarta.transaction.Transactional;
@@ -26,6 +27,11 @@ public class TagServiceImpl implements TagService{
   @Override
   public Optional<TagDTO> getById(Long id) {
     return tagRepository.findById(id).map(Tag::getDTO);
+  }
+
+  @Override
+  public Optional<TagDTO> getByName(String name) {
+    return tagRepository.findByName(name).map(Tag::getDTO);
   }
 
   @Override
