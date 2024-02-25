@@ -2,7 +2,9 @@ package com.example.demo.models.controller;
 
 import com.example.demo.models.entity.Book;
 import com.example.demo.models.DTO.BookRequest;
+import com.example.demo.models.service.AuthorService;
 import com.example.demo.models.service.BookService;
+import com.example.demo.models.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +28,11 @@ class BookControllerTest {
   @Autowired
   private TestRestTemplate rest;
   @Autowired
+  private AuthorService authorService;
+  @Autowired
   private BookService bookService;
+  @Autowired
+  private TagService tagService;
 
   private String getSearchUrl() {
     return UriComponentsBuilder.fromHttpUrl(rest.getRootUri() + "/api/books/search")

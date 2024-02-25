@@ -10,9 +10,11 @@ import java.util.List;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
+
+  //@Query("select b from book b where :tag_id in b.tags")
   @Query(
       value = """
-      SELECT *
+      SELECT book.id, book.title
       FROM books as book
       INNER JOIN book_tag as bt
       ON book.id = bt.book_id
