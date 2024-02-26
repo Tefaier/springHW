@@ -1,13 +1,14 @@
 package com.example.demo.models.controller;
 
+import com.example.demo.models.DTO.*;
 import com.example.demo.models.entity.Book;
-import com.example.demo.models.DTO.BookRequest;
 import com.example.demo.models.service.AuthorService;
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -23,8 +24,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class BookControllerTest {
+class AuthorBookTagControllerTest {
   @Autowired
   private TestRestTemplate rest;
   @Autowired
@@ -34,39 +36,68 @@ class BookControllerTest {
   @Autowired
   private TagService tagService;
 
-  private String getSearchUrl() {
-    return UriComponentsBuilder.fromHttpUrl(rest.getRootUri() + "/api/books/search")
-        .queryParam("tag", "{tag}")
-        .encode()
-        .toUriString();
+  private ResponseEntity<AuthorDTO> createAuthorRequest(AuthorRequest authorRequest) {
+    return rest.postForEntity(
+        "/api/authors/add",
+        authorRequest,
+        AuthorDTO.class);
   }
 
-  private ResponseEntity<Book> createRequest(BookRequest bookCreateRequest) {
+  private ResponseEntity<AuthorDTO> getAuthorRequest(Long id) {
+    return rest.getForEntity("/api/authors/" + id, AuthorDTO.class);
+  }
+
+  private ResponseEntity<AuthorDTO> updateAuthorRequest(Long id, AuthorRequest authorRequest) {
+    return rest.exchange("/api/authors/" + id, HttpMethod.PUT, new HttpEntity<>(authorRequest), AuthorDTO.class);
+  }
+
+  private void deleteAuthorRequest(Long id) {
+    rest.delete("/api/authors/" + id);
+  }
+
+  private ResponseEntity<BookDTO> createBookRequest(BookRequest bookRequest) {
     return rest.postForEntity(
         "/api/books/add",
-        bookCreateRequest,
-        Book.class);
+        bookRequest,
+        BookDTO.class);
   }
 
-  private ResponseEntity<Book> getRequest(Long id) {
-    return rest.getForEntity("/api/books/" + id, Book.class);
+  private ResponseEntity<BookDTO> getBookRequest(Long id) {
+    return rest.getForEntity("/api/books/" + id, BookDTO.class);
   }
 
-  private ResponseEntity<Book> updateRequest(Long id, BookUpdateRequest bookUpdateRequest) {
-    return rest.exchange("/api/books/" + id, HttpMethod.PUT, new HttpEntity<>(bookUpdateRequest), Book.class);
+  private ResponseEntity<BookDTO> updateBookRequest(Long id, BookRequest bookRequest) {
+    return rest.exchange("/api/books/" + id, HttpMethod.PUT, new HttpEntity<>(bookRequest), BookDTO.class);
   }
 
-  private ResponseEntity<List<Book>> searchRequest(Map<String, String> params) {
-    return rest.exchange(getSearchUrl(), HttpMethod.GET, null, new ParameterizedTypeReference<List<Book>>() {}, params);
-  }
-
-  private void deleteRequest(Long id) {
+  private void deleteBookRequest(Long id) {
     rest.delete("/api/books/" + id);
+  }
+
+  private ResponseEntity<TagDTO> createTagRequest(TagRequest tagRequest) {
+    return rest.postForEntity(
+        "/api/tags/add",
+        tagRequest,
+        TagDTO.class);
+  }
+
+  private ResponseEntity<TagDTO> getTagRequest(Long id) {
+    return rest.getForEntity("/api/tags/" + id, TagDTO.class);
+  }
+
+  private ResponseEntity<TagDTO> updateTagRequest(Long id, TagRequest tagRequest) {
+    return rest.exchange("/api/tags/" + id, HttpMethod.PUT, new HttpEntity<>(tagRequest), TagDTO.class);
+  }
+
+  private void deleteTagRequest(Long id) {
+    rest.delete("/api/tags/" + id);
   }
 
   @BeforeEach
   void cleanInfo() {
-    bookService.getAll().forEach(book -> bookService.delete(book));
+    authorService.getAll(false, false).forEach(author -> authorService.delete(author.getId()));
+    bookService.getAll(false).forEach(book -> bookService.delete(book.id()));
+    tagService.getAll().forEach(tag -> tagService.delete(tag.getId()));
   }
 
   @Test
@@ -123,18 +154,5 @@ class BookControllerTest {
       var updateBookResponseFail = updateRequest(id, data);
       assertTrue(updateBookResponseFail.getStatusCode().is4xxClientError(), "Unexpected status code: " + updateBookResponseFail.getStatusCode());
     }
-  }
-
-  @Test
-  void htmlListTest() {
-    String checkField = "All you need to know about lists";
-
-    var createBookResponse = createRequest(new BookRequest("HTML", checkField, Set.of("Cool", "Hell")));
-    assertTrue(createBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createBookResponse.getStatusCode());
-    Long id = createBookResponse.getBody().id;
-
-    ResponseEntity<String> viewBooksResponse =
-        rest.getForEntity("/books", String.class);
-    assertTrue(viewBooksResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + viewBooksResponse.getStatusCode());
   }
 }

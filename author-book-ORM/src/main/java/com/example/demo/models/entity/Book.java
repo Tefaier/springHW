@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.util.*;
@@ -34,6 +36,7 @@ public class Book {
       joinColumns = @JoinColumn(name = "book_id"),
       inverseJoinColumns = @JoinColumn(name = "tag_id")
   )
+  @Fetch(FetchMode.SUBSELECT)
   private Set<Tag> tags = new HashSet<>();
 
   protected Book() {}

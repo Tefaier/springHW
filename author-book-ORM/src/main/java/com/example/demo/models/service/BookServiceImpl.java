@@ -30,7 +30,7 @@ public class BookServiceImpl implements BookService {
   @Override
   @Transactional
   public List<BookDTO> getAll(boolean withTags) {
-    return bookRepository.findAll().stream().map(book -> Book.getDTO(book, withTags)).toList();
+    return bookRepository.findAllWithAuthors().stream().map(book -> Book.getDTO(book, withTags)).toList();
   }
 
   @Override

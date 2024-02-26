@@ -19,12 +19,18 @@ public class AuthorServiceImpl implements AuthorService {
   @Override
   @Transactional
   public List<AuthorDTO> getAll(boolean withBooks, boolean withTags) {
+    if (withBooks && withTags) {
+      return authorRepository.findAllWithBooksTags().stream().map(author -> Author.getDTO(author, withBooks, withTags)).toList();
+    }
     return authorRepository.findAll().stream().map(author -> Author.getDTO(author, withBooks, withTags)).toList();
   }
 
   @Override
   @Transactional
   public Optional<AuthorDTO> getById(Long id, boolean withBooks, boolean withTags) {
+    if (withBooks && withTags) {
+      return authorRepository.findById(id).map(value -> Author.getDTO(value, withBooks, withTags));
+    }
     return authorRepository.findById(id).map(value -> Author.getDTO(value, withBooks, withTags));
   }
 

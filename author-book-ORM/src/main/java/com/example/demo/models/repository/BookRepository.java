@@ -11,8 +11,8 @@ import java.util.List;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-  //@Query("select b from book b where :tag_id in b.tags")
-  @Query(
+  @Query("from Book as b inner join fetch b.tags as tag where tag.id = :tag_id")
+  /*@Query(
       value = """
       SELECT book.id, book.title
       FROM books as book
@@ -20,6 +20,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
       ON book.id = bt.book_id
       WHERE bt.tag_id = :tag_id
       """,
-      nativeQuery = true)
+      nativeQuery = true)*/
   List<Book> findWithTag(@Param("tag_id") Long tagID);
+
+  @Query("from Book b join fetch b.author")
+  List<Book> findAllWithAuthors();
 }

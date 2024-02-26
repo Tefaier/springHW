@@ -3,6 +3,7 @@ package com.example.demo.models.entity;
 import com.example.demo.models.DTO.AuthorDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.Fetch;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.context.annotation.Primary;
 
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static jakarta.persistence.CascadeType.PERSIST;
+import static org.hibernate.annotations.FetchMode.SUBSELECT;
 
 @Entity
 @Table(name = "authors")
@@ -29,6 +31,7 @@ public class Author {
   private String lastName;
 
   @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.LAZY, cascade = {PERSIST})
+  @Fetch(SUBSELECT)
   private List<Book> books = new ArrayList<>();
 
   protected Author () {}
