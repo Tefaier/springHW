@@ -12,5 +12,6 @@ public interface TagService {
   public Optional<TagDTO> getByName(String name);
   public TagDTO add(TagRequest request);
   public TagDTO update(Long id, TagRequest request);
+  public void deleteAll();
   public void delete(Long id);
 }

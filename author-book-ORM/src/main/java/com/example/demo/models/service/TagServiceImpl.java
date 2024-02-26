@@ -51,6 +51,11 @@ public class TagServiceImpl implements TagService{
   }
 
   @Override
+  public void deleteAll() {
+    tagRepository.deleteAll();
+  }
+
+  @Override
   @Transactional
   public void delete(Long id) {
     Tag tag = tagRepository.findById(id).orElseThrow();

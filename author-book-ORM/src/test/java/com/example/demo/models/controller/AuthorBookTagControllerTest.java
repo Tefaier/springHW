@@ -95,9 +95,9 @@ class AuthorBookTagControllerTest {
 
   @BeforeEach
   void cleanInfo() {
-    authorService.getAll(false, false).forEach(author -> authorService.delete(author.getId()));
-    bookService.getAll(false).forEach(book -> bookService.delete(book.id()));
-    tagService.getAll().forEach(tag -> tagService.delete(tag.getId()));
+    authorService.deleteAll();
+    bookService.deleteAll();
+    tagService.deleteAll();
   }
 
   @Test

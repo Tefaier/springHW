@@ -13,5 +13,6 @@ public interface AuthorService {
   public Optional<AuthorDTO> getById(Long id, boolean withBooks, boolean withTags);
   public AuthorDTO add(AuthorRequest request);
   public AuthorDTO update(Long id, AuthorRequest request);
+  public void deleteAll();
   public void delete(Long id);
 }

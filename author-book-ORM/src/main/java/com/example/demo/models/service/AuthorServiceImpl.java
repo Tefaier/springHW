@@ -54,6 +54,11 @@ public class AuthorServiceImpl implements AuthorService {
   }
 
   @Override
+  public void deleteAll() {
+    authorRepository.deleteAll();
+  }
+
+  @Override
   @Transactional
   public void delete(Long id) {
     Author author = authorRepository.findById(id).orElseThrow();
