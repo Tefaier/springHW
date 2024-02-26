@@ -26,11 +26,7 @@ public class Book {
     return String.join(" | ", tags);
   }
 
-  @JsonCreator
-  private Book (@JsonProperty("id") Long id,
-                @JsonProperty("author") String author,
-                @JsonProperty("title") String title,
-                @JsonProperty("tags") Set<String> tags) {
+  private Book (Long id, String author, String title, Set<String> tags) {
     this.id = id;
     this.author = author;
     this.title = title;
