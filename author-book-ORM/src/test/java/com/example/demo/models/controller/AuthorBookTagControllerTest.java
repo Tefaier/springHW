@@ -43,8 +43,8 @@ class AuthorBookTagControllerTest {
         AuthorDTO.class);
   }
 
-  private ResponseEntity<AuthorDTO> getAuthorRequest(Long id) {
-    return rest.getForEntity("/api/authors/" + id, AuthorDTO.class);
+  private ResponseEntity<AuthorDTO> getAuthorRequest(Long id, boolean withBooks, boolean withTags) {
+    return rest.getForEntity(getAuthorUrl(id, withBooks, withTags), AuthorDTO.class);
   }
 
   private ResponseEntity<AuthorDTO> updateAuthorRequest(Long id, AuthorRequest authorRequest) {
@@ -62,8 +62,8 @@ class AuthorBookTagControllerTest {
         BookDTO.class);
   }
 
-  private ResponseEntity<BookDTO> getBookRequest(Long id) {
-    return rest.getForEntity("/api/books/" + id, BookDTO.class);
+  private ResponseEntity<BookDTO> getBookRequest(Long id, boolean withTags) {
+    return rest.getForEntity(getBookUrl(id, withTags), BookDTO.class);
   }
 
   private ResponseEntity<BookDTO> updateBookRequest(Long id, BookRequest bookRequest) {
@@ -93,6 +93,21 @@ class AuthorBookTagControllerTest {
     rest.delete("/api/tags/" + id);
   }
 
+  private String getAuthorUrl(long id, boolean withBooks, boolean withTags) {
+    return UriComponentsBuilder.fromHttpUrl(rest.getRootUri() + "/api/authors/" + id)
+        .queryParam("books", withBooks)
+        .queryParam("tags", withTags)
+        .encode()
+        .toUriString();
+  }
+
+  private String getBookUrl(long id, boolean withTags) {
+    return UriComponentsBuilder.fromHttpUrl(rest.getRootUri() + "/api/books/" + id)
+        .queryParam("tags", withTags)
+        .encode()
+        .toUriString();
+  }
+
   @BeforeEach
   void cleanInfo() {
     authorService.deleteAll();
@@ -101,58 +116,68 @@ class AuthorBookTagControllerTest {
   }
 
   @Test
-  void bookAddTest() {
-    var createBookResponse = createRequest(new BookRequest("Tefaier", "protocol", Set.of("fluff", "modern time")));
+  void addTest() {
+    var createAuthorRequest = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
+    assertTrue(createAuthorRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createAuthorRequest.getStatusCode());
+    AuthorDTO authorDTO = createAuthorRequest.getBody();
+    assertNotNull(authorDTO.getId(), "Author was returned without id");
+    assertEquals("Tefaier", authorDTO.getFirstName());
+    assertEquals("The great", authorDTO.getLastName());
+
+    var createBookResponse = createBookRequest(new BookRequest(authorDTO.getId(), "protocol", null));
     assertTrue(createBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createBookResponse.getStatusCode());
-    Book createBookResponseBody = createBookResponse.getBody();
-    assertNotNull(createBookResponseBody.id, "Book was returned without id");
+    BookDTO bookDTO = createBookResponse.getBody();
+    assertNotNull(bookDTO.id(), "Book was returned without id");
+    assertEquals(authorDTO.getId(), bookDTO.authorID());
+    assertEquals("protocol", bookDTO.title());
+    assertEquals(1, getAuthorRequest(authorDTO.getId(), true, false).getBody().getBooks().size());
 
-    var getBookResponse = getRequest(createBookResponseBody.id);
-    assertTrue(getBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + getBookResponse.getStatusCode());
-    Book getBookResponseBody = getBookResponse.getBody();
-    assertEquals("Tefaier", getBookResponseBody.author);
-    assertEquals("protocol", getBookResponseBody.title);
-    assertEquals(Set.of("fluff", "modern time"), getBookResponseBody.tags);
-
-    var updateBookResponse = updateRequest(createBookResponseBody.id, new BookUpdateRequest(null, "protocol v2", Set.of("fluff", "future time")));
-    assertTrue(updateBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + updateBookResponse.getStatusCode());
-    Book updateBookResponseBody = updateBookResponse.getBody();
-    assertEquals("protocol v2", updateBookResponseBody.title);
-
-    var getBooksTagResponse = searchRequest(Map.of("tag", "future time"));
-    assertTrue(getBooksTagResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + getBooksTagResponse.getStatusCode());
-    List<Book> getBooksTagResponseBody = getBooksTagResponse.getBody();
-    assertEquals(1, getBooksTagResponseBody.size());
-    assertEquals("protocol v2", getBooksTagResponseBody.get(0).title);
-
-    deleteRequest(createBookResponseBody.id);
-    var getBookResponseFail = getRequest(createBookResponseBody.id);
-    assertTrue(getBookResponseFail.getStatusCode().is4xxClientError(), "Unexpected status code: " + getBookResponseFail.getStatusCode());
+    var createTagResponse = createTagRequest(new TagRequest("modern"));
+    assertTrue(createTagResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createTagResponse.getStatusCode());
+    TagDTO tagDTO = createTagResponse.getBody();
+    assertNotNull(tagDTO.getId(), "Tag was returned without id");
+    assertEquals("modern", tagDTO.getName());
   }
 
   @Test
-  void validationTest() {
-    var createBookResponse = createRequest(new BookRequest("Test", "test", null));
-    assertTrue(createBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createBookResponse.getStatusCode());
-    Long id = createBookResponse.getBody().id;
+  void deleteTest() {
+    var createAuthorRequest = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
+    AuthorDTO authorDTO = createAuthorRequest.getBody();
 
-    List<BookRequest> createRequests = List.of(
-        new BookRequest(null, "protocol", Set.of()),
-        new BookRequest("", "protocol", Set.of()),
-        new BookRequest("Tet", null, Set.of()),
-        new BookRequest("Tet", "", Set.of()));
-    List<BookUpdateRequest> updateRequests = List.of(
-        new BookUpdateRequest("", "protocol", Set.of()),
-        new BookUpdateRequest("Tet", "", Set.of()));
+    var createBookResponse = createBookRequest(new BookRequest(authorDTO.getId(), "protocol", null));
+    BookDTO bookDTO = createBookResponse.getBody();
 
-    for (var data: createRequests) {
-      var createBookResponseFail = createRequest(data);
-      assertTrue(createBookResponseFail.getStatusCode().is4xxClientError(), "Unexpected status code: " + createBookResponseFail.getStatusCode());
-    }
+    var createTagResponse = createTagRequest(new TagRequest("modern"));
+    TagDTO tagDTO = createTagResponse.getBody();
 
-    for (var data: updateRequests) {
-      var updateBookResponseFail = updateRequest(id, data);
-      assertTrue(updateBookResponseFail.getStatusCode().is4xxClientError(), "Unexpected status code: " + updateBookResponseFail.getStatusCode());
-    }
+    deleteAuthorRequest(authorDTO.getId());
+    assertTrue(getAuthorRequest(authorDTO.getId(), false, false).getStatusCode().is4xxClientError(), "Author was not deleted");
+    assertTrue(getBookRequest(bookDTO.id(), false).getStatusCode().is4xxClientError(), "Book didn't follow author deletion");
+
+    deleteTagRequest(tagDTO.getId());
+    assertTrue(getTagRequest(tagDTO.getId()).getStatusCode().is4xxClientError(), "Tag was not deleted");
+
+    AuthorDTO authorDTO2 = createAuthorRequest(new AuthorRequest("Tefaier", "The great")).getBody();
+    BookDTO bookDTO2 = createBookRequest(new BookRequest(authorDTO2.getId(), "protocol", null)).getBody();
+    deleteBookRequest(bookDTO2.id());
+
+    AuthorDTO authorDTOEmpty = getAuthorRequest(authorDTO2.getId(), true, false).getBody();
+    assertEquals(0, authorDTOEmpty.getBooks().size());
+  }
+
+  @Test
+  void updateTest() {
+    var createAuthorRequest1 = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
+    AuthorDTO authorDTO1 = createAuthorRequest1.getBody();
+    var createAuthorRequest2 = createAuthorRequest(new AuthorRequest("Desh", "Not so great"));
+    AuthorDTO authorDTO2 = createAuthorRequest2.getBody();
+
+    var createBookResponse = createBookRequest(new BookRequest(authorDTO1.getId(), "protocol", null));
+    BookDTO bookDTO = createBookResponse.getBody();
+
+    var createTagResponse = createTagRequest(new TagRequest("modern"));
+    TagDTO tagDTO = createTagResponse.getBody();
+
+
   }
 }

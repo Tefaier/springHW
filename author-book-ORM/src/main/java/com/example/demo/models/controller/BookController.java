@@ -27,8 +27,10 @@ public class BookController {
   private BookService bookService;
 
   @GetMapping("/{id}")
-  public BookDTO getBook(@NotNull @PathVariable("id") Long id) {
-    return bookService.getById(id, false).orElseThrow();
+  public BookDTO getBook(
+      @NotNull @PathVariable("id") Long id,
+      @RequestParam(value = "tags", required = false, defaultValue = "false") String getTags) {
+    return bookService.getById(id, Boolean.parseBoolean(getTags)).orElseThrow();
   }
 
   @PostMapping(path = "/add")

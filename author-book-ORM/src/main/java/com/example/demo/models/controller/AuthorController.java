@@ -17,8 +17,11 @@ public class AuthorController {
   private AuthorService authorService;
 
   @GetMapping("/{id}")
-  public AuthorDTO getAuthor(@NotNull @PathVariable("id") Long id) {
-    return authorService.getById(id, false, false).orElseThrow();
+  public AuthorDTO getAuthor(
+      @NotNull @PathVariable("id") Long id,
+      @RequestParam(value = "books", required = false, defaultValue = "false") String getBooks,
+      @RequestParam(value = "tags", required = false, defaultValue = "false") String getTags) {
+    return authorService.getById(id, Boolean.parseBoolean(getBooks), Boolean.parseBoolean(getTags)).orElseThrow();
   }
 
   @PostMapping(path = "/add")
