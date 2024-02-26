@@ -2,6 +2,7 @@ package com.example.demo.models.controller;
 
 import com.example.demo.models.DTO.*;
 import com.example.demo.models.entity.Book;
+import com.example.demo.models.entity.ChangeType;
 import com.example.demo.models.service.AuthorService;
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.service.TagService;
@@ -178,6 +179,30 @@ class AuthorBookTagControllerTest {
     var createTagResponse = createTagRequest(new TagRequest("modern"));
     TagDTO tagDTO = createTagResponse.getBody();
 
+    // author update of first name, second name
+    var updateAuthorRequest = updateAuthorRequest(authorDTO1.getId(), new AuthorRequest("Tefaier v2", "Super great"));
+    assertTrue(updateAuthorRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + updateAuthorRequest.getStatusCode());
+    var authorDTO1_2 = getAuthorRequest(authorDTO1.getId(), false, false).getBody();
+    assertEquals("Tefaier v2", authorDTO1_2.getFirstName());
+    assertEquals("Super great", authorDTO1_2.getLastName());
 
+    // book update of author, title, tag add
+    var updateBookRequest = updateBookRequest(bookDTO.id(), new BookRequest(authorDTO2.getId(), "protocol v2", Map.of(tagDTO.getId(), ChangeType.Add)));
+    assertTrue(updateBookRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + updateBookRequest.getStatusCode());
+    var bookDTO_2 = getBookRequest(bookDTO.id(), true).getBody();
+    assertEquals(authorDTO2.getId(), bookDTO_2.authorID());
+    assertEquals("protocol v2", bookDTO_2.title());
+    assertEquals(1, bookDTO_2.tags().size());
+    assertEquals(0, getAuthorRequest(authorDTO1.getId(), true, false).getBody().getBooks().size());
+
+    // book update tag remove
+    updateBookRequest(bookDTO.id(), new BookRequest(null, null, Map.of(tagDTO.getId(), ChangeType.Remove)));
+    assertEquals(0, getBookRequest(bookDTO.id(), true).getBody().tags().size());
+
+    // tag update
+    var updateTagRequest = updateTagRequest(authorDTO1.getId(), new TagRequest("future"));
+    assertTrue(updateTagRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + updateTagRequest.getStatusCode());
+    var tagDTO_2 = getTagRequest(authorDTO1.getId()).getBody();
+    assertEquals("future", tagDTO_2.getName());
   }
 }
