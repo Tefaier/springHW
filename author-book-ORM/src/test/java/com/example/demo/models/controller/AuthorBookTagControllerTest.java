@@ -200,9 +200,9 @@ class AuthorBookTagControllerTest {
     assertEquals(0, getBookRequest(bookDTO.id(), true).getBody().tags().size());
 
     // tag update
-    var updateTagRequest = updateTagRequest(authorDTO1.getId(), new TagRequest("future"));
+    var updateTagRequest = updateTagRequest(tagDTO.getId(), new TagRequest("future"));
     assertTrue(updateTagRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + updateTagRequest.getStatusCode());
-    var tagDTO_2 = getTagRequest(authorDTO1.getId()).getBody();
+    var tagDTO_2 = getTagRequest(tagDTO.getId()).getBody();
     assertEquals("future", tagDTO_2.getName());
   }
 }
