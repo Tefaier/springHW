@@ -8,13 +8,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("")
 @Validated
 public class BookController {
   private final BookService bookService;
@@ -24,12 +25,12 @@ public class BookController {
     this.bookService = bookService;
   }
 
-  @PostMapping(path = "/books/add")
+  @PostMapping(path = "/api/books/add")
   public Book createBook(@Valid @RequestBody BookCreateRequest book) {
     return bookService.add(new Book(book.getAuthor(), book.getTitle(), book.getTags()));
   }
 
-  @PutMapping("/books/{id}")
+  @PutMapping("/api/books/{id}")
   public Book updateBook(@NotNull @PathVariable("id") Long id,
                          @Valid @RequestBody BookUpdateRequest update) {
     Book book = bookService.getById(id).orElseThrow();
@@ -45,12 +46,12 @@ public class BookController {
     return bookService.update(book);
   }
 
-  @GetMapping("/books/{id}")
+  @GetMapping("/api/books/{id}")
   public Book getBook(@NotNull @PathVariable("id") Long id) {
     return bookService.getById(id).orElseThrow();
   }
 
-  @GetMapping("/books/search")
+  @GetMapping("/api/books/search")
   public List<Book> getBooksByTag(@Size(min=1) @RequestParam(value = "tag", required = false) String tag) {
     if (tag == null) {
       return bookService.getAll();
@@ -58,8 +59,15 @@ public class BookController {
     return bookService.getWithTag(tag);
   }
 
-  @DeleteMapping("/books/{id}")
+  @DeleteMapping("/api/books/{id}")
   public void deleteBook(@NotNull @PathVariable("id") Long id) {
     bookService.delete(bookService.getById(id).orElseThrow());
+  }
+
+  @GetMapping("/books")
+  public String viewBooks(Model model) {
+    var books = bookService.getAll();
+    model.addAttribute("books", books);
+    return "books";
   }
 }
