@@ -1,5 +1,6 @@
 package com.example.demo.models.controller;
 
+import com.example.demo.models.DBSuite;
 import com.example.demo.models.DTO.*;
 import com.example.demo.models.entity.Book;
 import com.example.demo.models.entity.ChangeType;
@@ -27,7 +28,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class AuthorBookTagControllerTest {
+class AuthorBookTagControllerTest extends DBSuite {
   @Autowired
   private TestRestTemplate rest;
   @Autowired
