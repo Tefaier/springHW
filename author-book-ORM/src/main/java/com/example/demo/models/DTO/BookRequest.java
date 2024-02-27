@@ -13,6 +13,9 @@ public class BookRequest {
   private String title;
   private Map<Long, ChangeType> tagCommands;
 
+  private BookRequest() {
+  }
+
   public BookRequest(Long authorID, String title, Map<Long, ChangeType> tagCommands) {
     this.authorID = authorID;
     this.title = title;

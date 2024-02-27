@@ -11,12 +11,10 @@ public class AuthorDTO {
   private String lastName;
   private List<BookDTO> books;
 
-  @JsonCreator
-  public AuthorDTO(
-      @JsonProperty("id") Long id,
-      @JsonProperty("firstName") String firstName,
-      @JsonProperty("lastName") String lastName,
-      @JsonProperty("books") List<BookDTO> books) {
+  private AuthorDTO() {
+  }
+
+  public AuthorDTO(Long id, String firstName, String lastName, List<BookDTO> books) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;

@@ -9,6 +9,10 @@ public class AuthorRequest {
   @Size(min = 1, message = "Фамилия не может быть пустым")
   private String lastName;
 
+  private AuthorRequest() {
+
+  }
+
   public AuthorRequest(String firstName, String lastName) {
     this.firstName = firstName;
     this.lastName = lastName;

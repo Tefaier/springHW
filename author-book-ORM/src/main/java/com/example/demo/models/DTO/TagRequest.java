@@ -10,8 +10,10 @@ public class TagRequest {
   @Size(min = 1, message = "Имя тега не может быть пустым")
   private String name;
 
-  @JsonCreator
-  public TagRequest(@JsonProperty("name") String name) {
+  private TagRequest() {
+  }
+
+  public TagRequest(String name) {
     this.name = name;
   }
 

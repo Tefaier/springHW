@@ -7,10 +7,10 @@ public class TagDTO {
   private Long id;
   private String name;
 
-  @JsonCreator
-  public TagDTO(
-      @JsonProperty("id") Long id,
-      @JsonProperty("name") String name) {
+  private TagDTO() {
+  }
+
+  public TagDTO(Long id, String name) {
     this.id = id;
     this.name = name;
   }
