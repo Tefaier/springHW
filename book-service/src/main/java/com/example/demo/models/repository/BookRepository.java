@@ -1,6 +1,6 @@
-package com.example.models.repository;
+package com.example.demo.models.repository;
 
-import com.example.models.entity.Book;
+import com.example.demo.models.entity.Book;
 
 import java.util.List;
 import java.util.Optional;
