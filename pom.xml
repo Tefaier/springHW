@@ -11,6 +11,7 @@
     <modules>
         <module>book-service</module>
         <module>author-book-ORM</module>
+        <module>author-registry-service</module>
     </modules>
 
 
