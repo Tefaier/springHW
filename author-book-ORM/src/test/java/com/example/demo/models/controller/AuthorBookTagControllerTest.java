@@ -129,7 +129,7 @@ class AuthorBookTagControllerTest extends DBSuite {
 
   @Test
   void addTest() {
-    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(new BooleanDTO(true));
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(true);
 
     var createAuthorRequest = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
     assertTrue(createAuthorRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createAuthorRequest.getStatusCode());
@@ -155,7 +155,7 @@ class AuthorBookTagControllerTest extends DBSuite {
 
   @Test
   void deleteTest() {
-    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(new BooleanDTO(true));
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(true);
 
     var createAuthorRequest = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
     AuthorDTO authorDTO = createAuthorRequest.getBody();
@@ -183,7 +183,7 @@ class AuthorBookTagControllerTest extends DBSuite {
 
   @Test
   void updateTest() {
-    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(new BooleanDTO(true));
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(true);
 
     var createAuthorRequest1 = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
     AuthorDTO authorDTO1 = createAuthorRequest1.getBody();
@@ -234,11 +234,11 @@ class AuthorBookTagControllerTest extends DBSuite {
     when(bookServiceGateway.checkBookExists(
         refEq(new BookDTO(null, authorDTO1.getId(), "book1", null), "id", "tags"),
         any())
-    ).thenReturn(new BooleanDTO(true));
+    ).thenReturn(true);
     when(bookServiceGateway.checkBookExists(
         refEq(new BookDTO(null, authorDTO2.getId(), "book2", null), "id", "tags"),
         any())
-    ).thenReturn(new BooleanDTO(true));
+    ).thenReturn(true);
 
     // limit on creation test
     var createBookResponseFail = createBookRequest(new BookRequest(authorDTO1.getId(), "book4", null));
@@ -255,7 +255,7 @@ class AuthorBookTagControllerTest extends DBSuite {
 
     // limit on delete
     Mockito.reset(bookServiceGateway);
-    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(new BooleanDTO(false));
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(false);
     deleteBookRequest(bookDTO.id());
     var getBookResponse = getBookRequest(bookDTO.id(), false);
     assertTrue(getBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + getBookResponse.getStatusCode());

@@ -2,7 +2,6 @@ package com.example.demo.models.gateway;
 
 import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
-import com.example.demo.models.DTO.BooleanDTO;
 import com.example.demo.models.exceptions.BookRegistryFailException;
 import io.github.resilience4j.springboot3.retry.autoconfigure.RetryAutoConfiguration;
 import org.junit.jupiter.api.Test;
@@ -58,11 +57,11 @@ public class BookServiceRetryGatewayTest {
         eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
         eq(HttpMethod.POST),
         any(),
-        eq(BooleanDTO.class),
+        eq(Boolean.class),
         eq(Map.of("name", "first", "lastName", "last", "title", "book"))
-    )).thenAnswer((Answer<ResponseEntity<BooleanDTO>>) invocation -> {
+    )).thenAnswer((Answer<ResponseEntity<Boolean>>) invocation -> {
       requestTime.incrementAndGet();
-      return new ResponseEntity<>(new BooleanDTO(true), HttpStatus.BAD_GATEWAY);
+      return new ResponseEntity<>(true, HttpStatus.BAD_GATEWAY);
     });
 
     String id = UUID.randomUUID().toString();

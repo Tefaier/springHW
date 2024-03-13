@@ -2,7 +2,6 @@ package com.example.demo.models.gateway;
 
 import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
-import com.example.demo.models.DTO.BooleanDTO;
 import com.example.demo.models.exceptions.BookRegistryFailException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.github.resilience4j.springboot3.ratelimiter.autoconfigure.RateLimiterAutoConfiguration;
@@ -58,10 +57,10 @@ public class BookServiceRLGatewayTest {
         eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
         eq(HttpMethod.POST),
         any(),
-        eq(BooleanDTO.class),
+        eq(Boolean.class),
         eq(Map.of("name", "first", "lastName", "last", "title", "book"))
-    )).thenAnswer((Answer<ResponseEntity<BooleanDTO>>) invocation -> {
-      return new ResponseEntity<>(new BooleanDTO(true), HttpStatus.OK);
+    )).thenAnswer((Answer<ResponseEntity<Boolean>>) invocation -> {
+      return new ResponseEntity<>(true, HttpStatus.OK);
     });
 
     assertDoesNotThrow(

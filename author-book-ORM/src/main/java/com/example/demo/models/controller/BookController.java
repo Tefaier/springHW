@@ -42,7 +42,7 @@ public class BookController {
   public BookDTO createBook(@Valid @RequestBody BookRequest book) {
     if (!bookServiceGateway.checkBookExists(
                 new BookDTO(null, book.getAuthorID(), book.getTitle(), null),
-                UUID.randomUUID().toString()).value()) {
+                UUID.randomUUID().toString())) {
       throw new BookRejectionException("Such a book wasn't verified", new RuntimeException());
     }
     return bookService.add(book);
@@ -58,7 +58,7 @@ public class BookController {
                     update.getAuthorID() == null ? bookDTO.get().authorID() : update.getAuthorID(),
                     update.getTitle() == null ? bookDTO.get().title() : update.getTitle(),
                     null),
-                UUID.randomUUID().toString()).value()) {
+                UUID.randomUUID().toString())) {
       throw new BookRejectionException("Such a book wasn't verified or created", new RuntimeException());
     }
     return bookService.update(id, update);
@@ -69,7 +69,7 @@ public class BookController {
     Optional<BookDTO> bookDTO = bookService.getById(id, false);
     if (!bookServiceGateway.checkBookExists(
             new BookDTO(null, bookDTO.get().authorID(), bookDTO.get().title(), null),
-            UUID.randomUUID().toString()).value()) {
+            UUID.randomUUID().toString())) {
       throw new BookRejectionException("Such a book wasn't verified or created", new RuntimeException());
     }
 

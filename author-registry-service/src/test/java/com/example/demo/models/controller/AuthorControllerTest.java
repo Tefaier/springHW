@@ -2,7 +2,6 @@ package com.example.demo.models.controller;
 
 import com.example.demo.models.entity.Author;
 import com.example.demo.models.entity.Book;
-import com.example.demo.models.entity.BooleanDTO;
 import com.example.demo.models.service.BookService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,14 +26,14 @@ class AuthorControllerTest {
   @Autowired
   private BookService bookService;
 
-  private ResponseEntity<BooleanDTO> checkRequest(String name, String lastName, String title, String requestId) {
+  private ResponseEntity<Boolean> checkRequest(String name, String lastName, String title, String requestId) {
     HttpHeaders headers = new HttpHeaders();
     headers.add("X-REQUEST-ID", requestId);
-    ResponseEntity<BooleanDTO> bookResponse = rest.exchange(
+    ResponseEntity<Boolean> bookResponse = rest.exchange(
         "/api/book/exists?name={name}&lastName={lastName}&title={title}",
         HttpMethod.POST,
         new HttpEntity<>(headers),
-        BooleanDTO.class,
+        Boolean.class,
         Map.of("name", name, "lastName", lastName, "title", title)
     );
     return bookResponse;
@@ -52,14 +51,14 @@ class AuthorControllerTest {
   void simpleCheck() {
     var falseResponse = checkRequest("name1", "last1", "book4", "1");
     assertTrue(falseResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + falseResponse.getStatusCode());
-    assertFalse(falseResponse.getBody().value());
+    assertFalse(falseResponse.getBody());
 
     var trueResponse = checkRequest("name1", "last2", "book3", "2");
     assertTrue(trueResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + trueResponse.getStatusCode());
-    assertTrue(trueResponse.getBody().value());
+    assertTrue(trueResponse.getBody());
 
     var sameIdResponse = checkRequest("name1", "last1", "book4", "2");
     assertTrue(sameIdResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + sameIdResponse.getStatusCode());
-    assertTrue(sameIdResponse.getBody().value());
+    assertTrue(sameIdResponse.getBody());
   }
 }

@@ -1,7 +1,6 @@
 package com.example.demo.models.gateway;
 
 import com.example.demo.models.DTO.BookDTO;
-import com.example.demo.models.DTO.BooleanDTO;
 import com.example.demo.models.exceptions.BookRegistryFailException;
 import com.example.demo.models.service.AuthorService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -36,24 +35,24 @@ public class HttpBookServiceGateway implements BookServiceGateway {
   @CircuitBreaker(name = "bookRegistry")//, fallbackMethod = "fallbackCircuitBreaker")
   @Retry(name = "bookRegistry")
   @Override
-  public BooleanDTO checkBookExists(BookDTO bookDTO, String requestId) {
+  public Boolean checkBookExists(BookDTO bookDTO, String requestId) {
     try {
-      if (bookDTO.authorID() == null) return new BooleanDTO(false);
+      if (bookDTO.authorID() == null) return false;
       var author = authorService.getById(bookDTO.authorID(), false, false);
-      if (author.isEmpty()) return new BooleanDTO(false);
+      if (author.isEmpty()) return false;
       HttpHeaders headers = new HttpHeaders();
       // фиксируем уникальный request-id
       headers.add("X-REQUEST-ID", requestId);
-      ResponseEntity<BooleanDTO> bookResponse = restTemplate.exchange(
+      ResponseEntity<Boolean> bookResponse = restTemplate.exchange(
           "/api/book/exists?name={name}&lastName={lastName}&title={title}",
           HttpMethod.POST,
           new HttpEntity<>(headers),
-          BooleanDTO.class,
+          Boolean.class,
           Map.of("name", author.get().getFirstName(), "lastName", author.get().getLastName(), "title", bookDTO.title())
       );
       LOGGER.info("Received response from author-registry-service {}", bookResponse);
       if (bookResponse.getStatusCode().is2xxSuccessful()) {
-        return new BooleanDTO(bookResponse.getBody().value());
+        return bookResponse.getBody();
       }
       throw new RestClientException("Unexpected status code " + bookResponse.getStatusCode());
     } catch (RestClientException e) {
@@ -61,12 +60,12 @@ public class HttpBookServiceGateway implements BookServiceGateway {
     }
   }
 
-  private BooleanDTO fallbackRateLimiter(BookDTO bookDTO, String requestId, RequestNotPermitted e) {
+  private Boolean fallbackRateLimiter(BookDTO bookDTO, String requestId, RequestNotPermitted e) {
     LOGGER.warn("Error due to Rate Limiting options", e);
     throw new BookRegistryFailException(e.getMessage(), e);
   }
 
-  private BooleanDTO fallbackCircuitBreaker(BookDTO bookDTO, String requestId, RequestNotPermitted e) {
+  private Boolean fallbackCircuitBreaker(BookDTO bookDTO, String requestId, RequestNotPermitted e) {
     LOGGER.warn("Error due to Circuit Breaker options", e);
     throw new BookRegistryFailException(e.getMessage(), e);
   }

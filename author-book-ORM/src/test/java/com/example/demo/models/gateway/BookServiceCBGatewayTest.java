@@ -2,7 +2,6 @@ package com.example.demo.models.gateway;
 
 import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
-import com.example.demo.models.DTO.BooleanDTO;
 import com.example.demo.models.exceptions.BookRegistryFailException;
 import com.example.demo.models.service.BookService;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -62,11 +61,11 @@ public class BookServiceCBGatewayTest {
         eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
         eq(HttpMethod.POST),
         any(),
-        eq(BooleanDTO.class),
+        eq(Boolean.class),
         eq(Map.of("name", "first", "lastName", "last", "title", "book"))
-    )).thenAnswer((Answer<ResponseEntity<BooleanDTO>>) invocation -> {
+    )).thenAnswer((Answer<ResponseEntity<Boolean>>) invocation -> {
       Thread.sleep(2000);
-      return new ResponseEntity<>(new BooleanDTO(true), HttpStatus.OK);
+      return new ResponseEntity<>(true, HttpStatus.OK);
     });
 
     assertDoesNotThrow(
@@ -87,7 +86,7 @@ public class BookServiceCBGatewayTest {
         eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
         eq(HttpMethod.POST),
         any(),
-        eq(BooleanDTO.class),
+        eq(Boolean.class),
         eq(Map.of("name", "first", "lastName", "last", "title", "book"))
     )).thenThrow(new RestClientException(debugString));
 
@@ -95,9 +94,9 @@ public class BookServiceCBGatewayTest {
         eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
         eq(HttpMethod.POST),
         any(),
-        eq(BooleanDTO.class),
+        eq(Boolean.class),
         eq(Map.of("name", "first", "lastName", "last", "title", "book2"))
-    )).thenAnswer((Answer<ResponseEntity<BooleanDTO>>) invocation -> new ResponseEntity<>(new BooleanDTO(true), HttpStatus.OK));
+    )).thenAnswer((Answer<ResponseEntity<Boolean>>) invocation -> new ResponseEntity<>(true, HttpStatus.OK));
 
     assertThrows(
         BookRegistryFailException.class,

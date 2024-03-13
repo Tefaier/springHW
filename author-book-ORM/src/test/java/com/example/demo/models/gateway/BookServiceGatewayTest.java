@@ -64,11 +64,7 @@ class BookServiceGatewayTest {
                     new Parameter("title", "1"))))
         .respond(req -> {
           Thread.sleep(3000);
-          return HttpResponse.response(
-                  """
-                      { "value": true }
-                      """
-          ).withHeader("Content-Type", "application/json");
+          return HttpResponse.response("true").withHeader("Content-Type", "application/json");
         });
     client
         .when(request()
@@ -78,18 +74,14 @@ class BookServiceGatewayTest {
                     new Parameter("name", "first"),
                     new Parameter("lastName", "last"),
                     new Parameter("title", "2"))))
-        .respond(req -> HttpResponse.response(
-            """
-                { "value": true }
-                """
-        ).withHeader("Content-Type", "application/json"));
+        .respond(req -> HttpResponse.response("true").withHeader("Content-Type", "application/json"));
 
     assertThrows(
         BookRegistryFailException.class,
         () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "1", null), UUID.randomUUID().toString())
     );
 
-    Boolean exists = bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "2", null), UUID.randomUUID().toString()).value();
+    Boolean exists = bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "2", null), UUID.randomUUID().toString());
     assertTrue(exists);
   }
 }
