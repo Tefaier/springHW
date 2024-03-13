@@ -31,8 +31,8 @@ public class HttpBookServiceGateway implements BookServiceGateway {
   @Autowired
   private RestTemplate restTemplate;
 
-  @RateLimiter(name = "bookRegistry")//, fallbackMethod = "fallbackRateLimiter")
-  @CircuitBreaker(name = "bookRegistry")//, fallbackMethod = "fallbackCircuitBreaker")
+  @RateLimiter(name = "bookRegistry", fallbackMethod = "fallbackRateLimiter")
+  @CircuitBreaker(name = "bookRegistry", fallbackMethod = "fallbackCircuitBreaker")
   @Retry(name = "bookRegistry")
   @Override
   public Boolean checkBookExists(BookDTO bookDTO, String requestId) {

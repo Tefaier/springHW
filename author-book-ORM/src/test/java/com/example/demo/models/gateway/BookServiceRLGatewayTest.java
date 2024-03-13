@@ -68,7 +68,7 @@ public class BookServiceRLGatewayTest {
     );
     // limit was filled
     assertThrows(
-        RequestNotPermitted.class,
+        BookRegistryFailException.class,
         () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
     );
   }

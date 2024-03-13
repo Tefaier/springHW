@@ -73,7 +73,7 @@ public class BookServiceCBGatewayTest {
     );
     // slow response filled CB limit
     assertThrows(
-        CallNotPermittedException.class,
+        BookRegistryFailException.class,
         () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
     );
   }
@@ -104,7 +104,7 @@ public class BookServiceCBGatewayTest {
     );
     // CB rejects due to failed request before
     assertThrows(
-        CallNotPermittedException.class,
+        BookRegistryFailException.class,
         () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book2", null), UUID.randomUUID().toString())
     );
   }
