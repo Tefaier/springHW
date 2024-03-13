@@ -4,8 +4,7 @@ import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
 import com.example.demo.models.DTO.BooleanDTO;
 import com.example.demo.models.exceptions.BookRegistryFailException;
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
-import io.github.resilience4j.springboot3.ratelimiter.autoconfigure.RateLimiterAutoConfiguration;
+import io.github.resilience4j.springboot3.retry.autoconfigure.RetryAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,18 +15,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -37,23 +35,25 @@ import static org.mockito.Mockito.when;
         HttpBookServiceGateway.class, AuthorServiceMock.class
     },
     properties = {
-        "resilience4j.ratelimiter.instances.bookRegistry.limitForPeriod=1",
-        "resilience4j.ratelimiter.instances.bookRegistry.limitRefreshPeriod=1h",
-        "resilience4j.ratelimiter.instances.bookRegistry.timeoutDuration=10ms",
+        "resilience4j.retry.instances.bookRegistry.retry-exceptions[0]=com.example.demo.models.exceptions.BookRegistryFailException",
+        "resilience4j.retry.instances.bookRegistry.wait-duration=100ms",
+        "resilience4j.retry.instances.bookRegistry.max-attempts=5",
         "authorService.mode=mock"
     }
 )
-@Import(RateLimiterAutoConfiguration.class)
+@Import(RetryAutoConfiguration.class)
 @EnableAspectJAutoProxy
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class BookServiceRLGatewayTest {
+public class BookServiceRetryGatewayTest {
   @Autowired
   private BookServiceGateway bookServiceGateway;
   @MockBean
   private RestTemplate restTemplate;
 
   @Test
-  void rateLimiterTest() {
+  void checkRetry() {
+    AtomicInteger requestTime = new AtomicInteger(0);
+
     when(restTemplate.exchange(
         eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
         eq(HttpMethod.POST),
@@ -61,16 +61,16 @@ public class BookServiceRLGatewayTest {
         eq(BooleanDTO.class),
         eq(Map.of("name", "first", "lastName", "last", "title", "book"))
     )).thenAnswer((Answer<ResponseEntity<BooleanDTO>>) invocation -> {
-      return new ResponseEntity<>(new BooleanDTO(true), HttpStatus.OK);
+      requestTime.incrementAndGet();
+      return new ResponseEntity<>(new BooleanDTO(true), HttpStatus.BAD_GATEWAY);
     });
 
-    assertDoesNotThrow(
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
-    );
-    // limit was filled
+    String id = UUID.randomUUID().toString();
+
     assertThrows(
-        RequestNotPermitted.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
+        BookRegistryFailException.class,
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), id)
     );
+    assertEquals(5, requestTime.get());
   }
 }

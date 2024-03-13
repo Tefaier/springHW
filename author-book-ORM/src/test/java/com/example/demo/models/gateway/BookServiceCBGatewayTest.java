@@ -1,39 +1,53 @@
 package com.example.demo.models.gateway;
 
+import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
+import com.example.demo.models.DTO.BooleanDTO;
 import com.example.demo.models.exceptions.BookRegistryFailException;
-import io.github.resilience4j.springboot3.ratelimiter.autoconfigure.RateLimiterAutoConfiguration;
+import com.example.demo.models.service.BookService;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.springboot3.circuitbreaker.autoconfigure.CircuitBreakerAutoConfiguration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(
     classes = {
-        BookServiceGateway.class
+        HttpBookServiceGateway.class, AuthorServiceMock.class
     },
     properties = {
-        "resilience4j.ratelimiter.instances.bookRegistry.limitForPeriod=1",
-        "resilience4j.ratelimiter.instances.bookRegistry.limitRefreshPeriod=1h",
-        "resilience4j.ratelimiter.instances.bookRegistry.timeoutDuration=0"
+        "resilience4j.circuitbreaker.instances.bookRegistry.slowCallRateThreshold=1",
+        "resilience4j.circuitbreaker.instances.bookRegistry.slowCallDurationThreshold=1000ms",
+        "resilience4j.circuitbreaker.instances.bookRegistry.slidingWindowType=COUNT_BASED",
+        "resilience4j.circuitbreaker.instances.bookRegistry.slidingWindowSize=1",
+        "resilience4j.circuitbreaker.instances.bookRegistry.minimumNumberOfCalls=1",
+        "resilience4j.circuitbreaker.instances.bookRegistry.waitDurationInOpenState=600s",
+        "authorService.mode=mock"
     }
 )
-@Import(RateLimiterAutoConfiguration.class)
+@Import(CircuitBreakerAutoConfiguration.class)
 @EnableAspectJAutoProxy
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class BookServiceCBGatewayTest {
@@ -44,42 +58,55 @@ public class BookServiceCBGatewayTest {
 
   @Test
   void shouldRejectRequestAfterFirstServerSlowResponse() {
-    when(restTemplate.postForEntity(
-        eq("/api/book/exists?name={name},lastName={lastName},title={title}"),
-        null,
-        eq(Boolean.class),
-        eq(Map.of("name", "МГТУ", "lastName", "", "title", ""))
-    )).thenAnswer((Answer<ResponseEntity<Boolean>>) invocation -> {
+    when(restTemplate.exchange(
+        eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
+        eq(HttpMethod.POST),
+        any(),
+        eq(BooleanDTO.class),
+        eq(Map.of("name", "first", "lastName", "last", "title", "book"))
+    )).thenAnswer((Answer<ResponseEntity<BooleanDTO>>) invocation -> {
       Thread.sleep(2000);
-      return new ResponseEntity<>(true, HttpStatus.OK);
+      return new ResponseEntity<>(new BooleanDTO(true), HttpStatus.OK);
     });
 
     assertDoesNotThrow(
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "", null))
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
     );
-
+    // slow response filled CB limit
     assertThrows(
-        BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "", null))
+        CallNotPermittedException.class,
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
     );
   }
 
   @Test
   void shouldRejectRequestAfterFirstServerFailResponse() {
-    when(restTemplate.postForEntity(
-        eq("/api/book/exists?name={name},lastName={lastName},title={title}"),
-        null,
-        eq(Boolean.class),
-        eq(Map.of("name", "МГТУ", "lastName", "", "title", ""))
-    )).thenThrow(new RestClientException("Unexpected error"));
+    String debugString = "ABSDEFGHI...";
 
-    assertDoesNotThrow(
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "", null))
-    );
+    when(restTemplate.exchange(
+        eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
+        eq(HttpMethod.POST),
+        any(),
+        eq(BooleanDTO.class),
+        eq(Map.of("name", "first", "lastName", "last", "title", "book"))
+    )).thenThrow(new RestClientException(debugString));
+
+    when(restTemplate.exchange(
+        eq("/api/book/exists?name={name}&lastName={lastName}&title={title}"),
+        eq(HttpMethod.POST),
+        any(),
+        eq(BooleanDTO.class),
+        eq(Map.of("name", "first", "lastName", "last", "title", "book2"))
+    )).thenAnswer((Answer<ResponseEntity<BooleanDTO>>) invocation -> new ResponseEntity<>(new BooleanDTO(true), HttpStatus.OK));
 
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "", null))
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
+    );
+    // CB rejects due to failed request before
+    assertThrows(
+        CallNotPermittedException.class,
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book2", null), UUID.randomUUID().toString())
     );
   }
 }
