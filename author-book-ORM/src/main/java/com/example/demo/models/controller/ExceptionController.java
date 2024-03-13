@@ -1,5 +1,7 @@
 package com.example.demo.models.controller;
 
+import com.example.demo.models.exceptions.BookRegistryFailException;
+import com.example.demo.models.exceptions.BookRejectionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -15,6 +17,16 @@ import java.util.NoSuchElementException;
 public class ExceptionController {
   @ExceptionHandler
   public ResponseEntity<Exception> noSuchElementExceptionHandler(NoSuchElementException ex) {
+    return ResponseEntity.status(422).body(new Exception(ex.getMessage()));
+  }
+
+  @ExceptionHandler
+  public ResponseEntity<Exception> bookRegistryFailException(BookRegistryFailException ex) {
+    return ResponseEntity.status(422).body(new Exception(ex.getMessage()));
+  }
+
+  @ExceptionHandler
+  public ResponseEntity<Exception> BookRejectionException(BookRejectionException ex) {
     return ResponseEntity.status(422).body(new Exception(ex.getMessage()));
   }
 }
