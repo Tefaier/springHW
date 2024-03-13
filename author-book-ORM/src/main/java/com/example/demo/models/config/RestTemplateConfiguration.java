@@ -12,8 +12,8 @@ import java.time.Duration;
 public class RestTemplateConfiguration {
   @Bean
   public RestTemplate restTemplate(
-      @Value("{author-registry.service.base.url}") String baseUrl,
-      @Value("{author-registry.service.timeout.seconds}") Duration timeout
+      @Value("${author-registry.service.base.url}") String baseUrl,
+      @Value("${author-registry.service.timeout.seconds}") Duration timeout
   ) {
     return new RestTemplateBuilder()
         .setConnectTimeout(timeout)
