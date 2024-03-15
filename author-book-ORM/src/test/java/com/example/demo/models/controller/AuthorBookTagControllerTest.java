@@ -4,14 +4,17 @@ import com.example.demo.models.DBSuite;
 import com.example.demo.models.DTO.*;
 import com.example.demo.models.entity.Book;
 import com.example.demo.models.entity.ChangeType;
+import com.example.demo.models.gateway.BookServiceGateway;
 import com.example.demo.models.service.AuthorService;
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -24,10 +27,15 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = RANDOM_PORT,
+    properties = {"author-registry.mode=stub"}
+)
 class AuthorBookTagControllerTest extends DBSuite {
   @Autowired
   private TestRestTemplate rest;
@@ -37,6 +45,8 @@ class AuthorBookTagControllerTest extends DBSuite {
   private BookService bookService;
   @Autowired
   private TagService tagService;
+  @MockBean
+  private BookServiceGateway bookServiceGateway;
 
   private ResponseEntity<AuthorDTO> createAuthorRequest(AuthorRequest authorRequest) {
     return rest.postForEntity(
@@ -119,6 +129,8 @@ class AuthorBookTagControllerTest extends DBSuite {
 
   @Test
   void addTest() {
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(true);
+
     var createAuthorRequest = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
     assertTrue(createAuthorRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createAuthorRequest.getStatusCode());
     AuthorDTO authorDTO = createAuthorRequest.getBody();
@@ -143,6 +155,8 @@ class AuthorBookTagControllerTest extends DBSuite {
 
   @Test
   void deleteTest() {
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(true);
+
     var createAuthorRequest = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
     AuthorDTO authorDTO = createAuthorRequest.getBody();
 
@@ -169,6 +183,8 @@ class AuthorBookTagControllerTest extends DBSuite {
 
   @Test
   void updateTest() {
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(true);
+
     var createAuthorRequest1 = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
     AuthorDTO authorDTO1 = createAuthorRequest1.getBody();
     var createAuthorRequest2 = createAuthorRequest(new AuthorRequest("Desh", "Not so great"));
@@ -205,5 +221,44 @@ class AuthorBookTagControllerTest extends DBSuite {
     assertTrue(updateTagRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + updateTagRequest.getStatusCode());
     var tagDTO_2 = getTagRequest(tagDTO.getId()).getBody();
     assertEquals("future", tagDTO_2.getName());
+  }
+
+  @Test
+  void bookRegistryGatewayInteractionTest() {
+    var createAuthorRequest1 = createAuthorRequest(new AuthorRequest("Name1", "Surname1"));
+    AuthorDTO authorDTO1 = createAuthorRequest1.getBody();
+    var createAuthorRequest2 = createAuthorRequest(new AuthorRequest("Name2", "Surname2"));
+    AuthorDTO authorDTO2 = createAuthorRequest2.getBody();
+
+    // book1 for author1, book2 for author2
+    when(bookServiceGateway.checkBookExists(
+        refEq(new BookDTO(null, authorDTO1.getId(), "book1", null), "id", "tags"),
+        any())
+    ).thenReturn(true);
+    when(bookServiceGateway.checkBookExists(
+        refEq(new BookDTO(null, authorDTO2.getId(), "book2", null), "id", "tags"),
+        any())
+    ).thenReturn(true);
+
+    // limit on creation test
+    var createBookResponseFail = createBookRequest(new BookRequest(authorDTO1.getId(), "book4", null));
+    assertTrue(createBookResponseFail.getStatusCode().is4xxClientError(), "Unexpected status code: " + createBookResponseFail.getStatusCode());
+    var createBookResponse = createBookRequest(new BookRequest(authorDTO1.getId(), "book1", null));
+    assertTrue(createBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + createBookResponse.getStatusCode());
+    BookDTO bookDTO = createBookResponse.getBody();
+
+    // limit on update test
+    var updateBookRequestFail = updateBookRequest(bookDTO.id(), new BookRequest(authorDTO2.getId(), null, null));
+    assertTrue(updateBookRequestFail.getStatusCode().is4xxClientError(), "Unexpected status code: " + updateBookRequestFail.getStatusCode());
+    var updateBookRequest = updateBookRequest(bookDTO.id(), new BookRequest(authorDTO2.getId(), "book2", null));
+    assertTrue(updateBookRequest.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + updateBookRequest.getStatusCode());
+
+    // limit on delete
+    Mockito.reset(bookServiceGateway);
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(false);
+    deleteBookRequest(bookDTO.id());
+    var getBookResponse = getBookRequest(bookDTO.id(), false);
+    assertTrue(getBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + getBookResponse.getStatusCode());
+    assertEquals("book2", getBookResponse.getBody().title());
   }
 }
