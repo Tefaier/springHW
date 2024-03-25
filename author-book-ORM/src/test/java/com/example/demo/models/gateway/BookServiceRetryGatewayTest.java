@@ -68,7 +68,7 @@ public class BookServiceRetryGatewayTest {
 
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), id)
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), id)
     );
     assertEquals(5, requestTime.get());
   }

@@ -64,12 +64,12 @@ public class BookServiceRLGatewayTest {
     });
 
     assertDoesNotThrow(
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
     );
     // limit was filled
     assertThrows(
         RequestNotPermitted.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
     );
   }
 }
