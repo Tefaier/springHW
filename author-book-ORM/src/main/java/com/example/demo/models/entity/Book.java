@@ -30,6 +30,9 @@ public class Book {
   private String title;
 
   @Column
+  private Float rating;
+
+  @Column
   @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinTable(
       name = "book_tag",
@@ -41,10 +44,11 @@ public class Book {
 
   protected Book() {}
 
-  public Book (Author author, String title, Set<Tag> tags) {
+  public Book (Author author, String title, Float rating, Set<Tag> tags) {
     this.id = null;
     this.author = author;
     this.title = title;
+    this.rating = rating;
     this.tags = tags;
   }
 
@@ -90,6 +94,14 @@ public class Book {
     this.tags.removeIf(tag -> Objects.equals(tag.getId(), tagID));
   }
 
+  public Float getRating() {
+    return rating;
+  }
+
+  public void setRating(Float rating) {
+    this.rating = rating;
+  }
+
   @Override
   public final boolean equals(Object o) {
     if (this == o) return true;
@@ -111,6 +123,7 @@ public class Book {
         book.getId(),
         book.getAuthor().getId(),
         book.getTitle(),
+        book.getRating(),
         withTags ?
             book.getTags().stream().map(Tag::getDTO).collect(Collectors.toSet()) :
             new HashSet<>());

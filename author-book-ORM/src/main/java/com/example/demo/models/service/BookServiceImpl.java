@@ -56,7 +56,7 @@ public class BookServiceImpl implements BookService {
     return Book.getDTO(
         bookRepository.save(new Book(
             authorRepository.findById(request.getAuthorID()).orElseThrow(),
-            request.getTitle(), null)),
+            request.getTitle(), null, null)),
         false);
   }
 
@@ -80,6 +80,15 @@ public class BookServiceImpl implements BookService {
         logger.warn("An attempt to add non existent tag with id " + command.getKey() + " to book " + id);
       }
     }
+    bookRepository.save(book);
+    return Book.getDTO(book, false);
+  }
+
+  @Override
+  @Transactional
+  public BookDTO updateRating(Long id, Float rating) {
+    Book book = bookRepository.findById(id).orElseThrow();
+    book.setRating(rating);
     bookRepository.save(book);
     return Book.getDTO(book, false);
   }

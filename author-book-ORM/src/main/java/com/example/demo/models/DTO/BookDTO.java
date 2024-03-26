@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Set;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record BookDTO(Long id, Long authorID, String title, Set<TagDTO> tags) {
+public record BookDTO(Long id, Long authorID, String title, Float rating, Set<TagDTO> tags) {
   public String getTagsString() {
     return String.join(" | ", tags.stream().map(TagDTO::getName).toList());
   }

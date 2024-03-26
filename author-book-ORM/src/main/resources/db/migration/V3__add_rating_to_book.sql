@@ -1,0 +1,1 @@
+ALTER TABLE books ADD rating FLOAT default 0;

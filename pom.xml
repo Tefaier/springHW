@@ -12,6 +12,7 @@
         <module>book-service</module>
         <module>author-book-ORM</module>
         <module>author-registry-service</module>
+        <module>book-rating-service</module>
     </modules>
 
 
