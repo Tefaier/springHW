@@ -86,6 +86,7 @@ class BookRatingServiceKafkaTest {
     );
   }
 
+  // FAILS
   @Test
   void shouldGetMessageFromKafkaSuccessfully() throws JsonProcessingException {
     kafkaTemplate.send("some-test-topic-response", objectMapper.writeValueAsString(new BookRatingResult(30L, 6.7f)));

@@ -55,6 +55,7 @@ class BookRatingConsumerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  // FAILS
   @Test
   void shouldGetMessageFromKafkaSuccessfully() {
     kafkaTemplate.send("some-test-topic", String.valueOf(30L));
