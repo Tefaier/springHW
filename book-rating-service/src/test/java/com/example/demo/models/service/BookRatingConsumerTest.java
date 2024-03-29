@@ -13,6 +13,8 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -44,6 +46,11 @@ class BookRatingConsumerTest {
     }
   }
 
+  @DynamicPropertySource
+  static void overrideProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.kafka.consumer.auto-offset-reset", "earliest"::toString);
+  }
+
   @Container
   @ServiceConnection
   public static final KafkaContainer KAFKA = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"));
@@ -55,7 +62,6 @@ class BookRatingConsumerTest {
   @Autowired
   private ObjectMapper objectMapper;
 
-  // FAILS
   @Test
   void shouldGetMessageFromKafkaSuccessfully() {
     kafkaTemplate.send("some-test-topic", String.valueOf(30L));
