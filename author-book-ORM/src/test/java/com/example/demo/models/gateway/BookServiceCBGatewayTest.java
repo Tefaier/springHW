@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class BookServiceCBGatewayTest {
   @Autowired
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
   @MockBean
   private RestTemplate restTemplate;
 

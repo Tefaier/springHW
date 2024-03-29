@@ -47,7 +47,7 @@ import static org.mockito.Mockito.when;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class BookServiceRLGatewayTest {
   @Autowired
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
   @MockBean
   private RestTemplate restTemplate;
 
@@ -69,7 +69,7 @@ public class BookServiceRLGatewayTest {
     // limit was filled
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(2L, 1L, "book", null), UUID.randomUUID().toString())
     );
   }
 }
