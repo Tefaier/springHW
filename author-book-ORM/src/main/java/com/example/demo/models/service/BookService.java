@@ -14,6 +14,7 @@ public interface BookService {
   public List<BookDTO> getWithTag(String tagName);
   public BookDTO add(BookRequest request);
   public BookDTO update(Long id, BookRequest request);
+  public BookDTO updateRating(Long id, Float rating);
   public void deleteAll();
   public void delete(Long id);
 }

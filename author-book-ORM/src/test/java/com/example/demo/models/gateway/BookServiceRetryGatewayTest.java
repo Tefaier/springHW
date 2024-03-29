@@ -45,7 +45,7 @@ import static org.mockito.Mockito.when;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class BookServiceRetryGatewayTest {
   @Autowired
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
   @MockBean
   private RestTemplate restTemplate;
 
@@ -68,7 +68,7 @@ public class BookServiceRetryGatewayTest {
 
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), id)
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), id)
     );
     assertEquals(5, requestTime.get());
   }

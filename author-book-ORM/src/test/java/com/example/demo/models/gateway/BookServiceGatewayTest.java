@@ -49,7 +49,7 @@ class BookServiceGatewayTest {
   private RestTemplate restTemplate;
 
   @Autowired
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
 
   @Test
   void checkOfTimeout() {
@@ -78,10 +78,10 @@ class BookServiceGatewayTest {
 
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "1", null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "1", null, null), UUID.randomUUID().toString())
     );
 
-    Boolean exists = bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "2", null), UUID.randomUUID().toString());
+    Boolean exists = bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "2", null, null), UUID.randomUUID().toString());
     assertTrue(exists);
   }
 }

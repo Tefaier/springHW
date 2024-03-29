@@ -4,18 +4,23 @@ import com.example.demo.models.DBSuite;
 import com.example.demo.models.DTO.*;
 import com.example.demo.models.entity.Book;
 import com.example.demo.models.entity.ChangeType;
-import com.example.demo.models.gateway.BookServiceGateway;
+import com.example.demo.models.gateway.BookRatingService;
+import com.example.demo.models.gateway.HttpBookServiceGateway;
 import com.example.demo.models.service.AuthorService;
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.service.TagService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -24,19 +29,24 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(
     webEnvironment = RANDOM_PORT,
-    properties = {"author-registry.mode=stub"}
+    properties = {
+        "author-registry.mode=stub",
+        "book-rating.mode=stub"
+    }
 )
 class AuthorBookTagControllerTest extends DBSuite {
+
   @Autowired
   private TestRestTemplate rest;
   @Autowired
@@ -46,7 +56,9 @@ class AuthorBookTagControllerTest extends DBSuite {
   @Autowired
   private TagService tagService;
   @MockBean
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
+  @MockBean
+  private BookRatingService bookRatingService;
 
   private ResponseEntity<AuthorDTO> createAuthorRequest(AuthorRequest authorRequest) {
     return rest.postForEntity(
@@ -84,6 +96,15 @@ class AuthorBookTagControllerTest extends DBSuite {
 
   private void deleteBookRequest(Long id) {
     rest.delete("/api/books/" + id);
+  }
+
+  private void ratingBookRequest(Long id) {
+    rest.postForEntity(
+        "/api/books/{bookId}:checkRating",
+        null,
+        null,
+        Map.of("bookId", id)
+    );
   }
 
   private ResponseEntity<TagDTO> createTagRequest(TagRequest tagRequest) {
@@ -232,11 +253,11 @@ class AuthorBookTagControllerTest extends DBSuite {
 
     // book1 for author1, book2 for author2
     when(bookServiceGateway.checkBookExists(
-        refEq(new BookDTO(null, authorDTO1.getId(), "book1", null), "id", "tags"),
+        refEq(new BookDTO(null, authorDTO1.getId(), "book1", 0f, null), "id", "tags", "rating"),
         any())
     ).thenReturn(true);
     when(bookServiceGateway.checkBookExists(
-        refEq(new BookDTO(null, authorDTO2.getId(), "book2", null), "id", "tags"),
+        refEq(new BookDTO(null, authorDTO2.getId(), "book2", 0f, null), "id", "tags", "rating"),
         any())
     ).thenReturn(true);
 
@@ -260,5 +281,11 @@ class AuthorBookTagControllerTest extends DBSuite {
     var getBookResponse = getBookRequest(bookDTO.id(), false);
     assertTrue(getBookResponse.getStatusCode().is2xxSuccessful(), "Unexpected status code: " + getBookResponse.getStatusCode());
     assertEquals("book2", getBookResponse.getBody().title());
+  }
+
+  @Test
+  void bookRatingRequestCheck() {
+    ratingBookRequest(10L);
+    verify(bookRatingService).checkRating(eq(10L));
   }
 }
