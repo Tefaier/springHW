@@ -23,7 +23,7 @@ import java.util.Map;
 
 @Service
 @ConditionalOnProperty(value = "author-registry.mode", havingValue = "http")
-public class HttpBookServiceGateway implements BookServiceGateway {
+public class HttpBookServiceGateway {
   private static final Logger LOGGER = LoggerFactory.getLogger(HttpBookServiceGateway.class);
 
   @Autowired
@@ -31,10 +31,9 @@ public class HttpBookServiceGateway implements BookServiceGateway {
   @Autowired
   private RestTemplate restTemplate;
 
-  @RateLimiter(name = "bookRegistry")//, fallbackMethod = "fallbackRateLimiter")
-  @CircuitBreaker(name = "bookRegistry")//, fallbackMethod = "fallbackCircuitBreaker")
+  @RateLimiter(name = "bookRegistry", fallbackMethod = "fallbackRateLimiter")
+  @CircuitBreaker(name = "bookRegistry", fallbackMethod = "fallbackCircuitBreaker")
   @Retry(name = "bookRegistry")
-  @Override
   public Boolean checkBookExists(BookDTO bookDTO, String requestId) {
     try {
       if (bookDTO.authorID() == null) return false;
@@ -65,8 +64,8 @@ public class HttpBookServiceGateway implements BookServiceGateway {
     throw new BookRegistryFailException(e.getMessage(), e);
   }
 
-  private Boolean fallbackCircuitBreaker(BookDTO bookDTO, String requestId, RequestNotPermitted e) {
-    LOGGER.warn("Error due to Circuit Breaker options", e);
+  private Boolean fallbackCircuitBreaker(BookDTO bookDTO, String requestId, RuntimeException e) {
+    LOGGER.warn("Error while executing", e);
     throw new BookRegistryFailException(e.getMessage(), e);
   }
 }

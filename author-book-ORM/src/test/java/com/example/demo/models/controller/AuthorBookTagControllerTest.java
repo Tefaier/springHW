@@ -6,6 +6,7 @@ import com.example.demo.models.entity.Book;
 import com.example.demo.models.entity.ChangeType;
 import com.example.demo.models.gateway.BookRatingService;
 import com.example.demo.models.gateway.BookServiceGateway;
+import com.example.demo.models.gateway.HttpBookServiceGateway;
 import com.example.demo.models.service.AuthorService;
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.service.TagService;
@@ -56,7 +57,7 @@ class AuthorBookTagControllerTest extends DBSuite {
   @Autowired
   private TagService tagService;
   @MockBean
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
   @MockBean
   private BookRatingService bookRatingService;
 

@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class BookServiceCBGatewayTest {
   @Autowired
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
   @MockBean
   private RestTemplate restTemplate;
 
@@ -69,12 +69,12 @@ public class BookServiceCBGatewayTest {
     });
 
     assertDoesNotThrow(
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
     );
     // slow response filled CB limit
     assertThrows(
-        CallNotPermittedException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
+        BookRegistryFailException.class,
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
     );
   }
 
@@ -100,12 +100,12 @@ public class BookServiceCBGatewayTest {
 
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null), UUID.randomUUID().toString())
     );
     // CB rejects due to failed request before
     assertThrows(
-        CallNotPermittedException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book2", null, null), UUID.randomUUID().toString())
+        BookRegistryFailException.class,
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book2", null), UUID.randomUUID().toString())
     );
   }
 }
