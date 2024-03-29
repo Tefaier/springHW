@@ -2,7 +2,6 @@ package com.example.demo.models.controller;
 
 import com.example.demo.models.DTO.BookDTO;
 import com.example.demo.models.exceptions.BookRejectionException;
-import com.example.demo.models.gateway.BookServiceGateway;
 import com.example.demo.models.gateway.HttpBookServiceGateway;
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.DTO.BookRequest;
@@ -29,7 +28,7 @@ public class BookController {
   @Autowired
   private BookService bookService;
   @Autowired
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
 
   @GetMapping("/{id}")
   public BookDTO getBook(

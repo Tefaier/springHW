@@ -2,9 +2,8 @@ package com.example.demo.models.controller;
 
 import com.example.demo.models.DBSuite;
 import com.example.demo.models.DTO.*;
-import com.example.demo.models.entity.Book;
 import com.example.demo.models.entity.ChangeType;
-import com.example.demo.models.gateway.BookServiceGateway;
+import com.example.demo.models.gateway.HttpBookServiceGateway;
 import com.example.demo.models.service.AuthorService;
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.service.TagService;
@@ -16,15 +15,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -46,7 +42,7 @@ class AuthorBookTagControllerTest extends DBSuite {
   @Autowired
   private TagService tagService;
   @MockBean
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
 
   private ResponseEntity<AuthorDTO> createAuthorRequest(AuthorRequest authorRequest) {
     return rest.postForEntity(

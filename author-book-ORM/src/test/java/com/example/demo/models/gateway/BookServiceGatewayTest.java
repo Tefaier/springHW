@@ -49,7 +49,7 @@ class BookServiceGatewayTest {
   private RestTemplate restTemplate;
 
   @Autowired
-  private BookServiceGateway bookServiceGateway;
+  private HttpBookServiceGateway bookServiceGateway;
 
   @Test
   void checkOfTimeout() {
