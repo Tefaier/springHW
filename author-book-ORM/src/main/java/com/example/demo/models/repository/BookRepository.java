@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
@@ -25,4 +26,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
   @Query("from Book b join fetch b.author")
   List<Book> findAllWithAuthors();
+
+
+  @Query(value = "select * from books where id = :id for update", nativeQuery = true)
+  Optional<Book> findByIdWithLock(Long id);
 }

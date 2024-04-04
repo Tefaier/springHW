@@ -2,6 +2,7 @@ package com.example.demo.models.gateway;
 
 import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
+import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.exceptions.BookRegistryFailException;
 import io.github.resilience4j.springboot3.retry.autoconfigure.RetryAutoConfiguration;
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,7 @@ public class BookServiceRetryGatewayTest {
 
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), id)
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null, BuyStatus.NotBought), id)
     );
     assertEquals(5, requestTime.get());
   }

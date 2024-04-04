@@ -2,7 +2,7 @@ package com.example.demo.models.service;
 
 import com.example.demo.models.DTO.BookDTO;
 import com.example.demo.models.DTO.BookRequest;
-import com.example.demo.models.entity.Book;
+import com.example.demo.models.enums.BuyStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,4 +17,5 @@ public interface BookService {
   public BookDTO updateRating(Long id, Float rating);
   public void deleteAll();
   public void delete(Long id);
+  public void setBuyStatus(Long id, BuyStatus status);
 }

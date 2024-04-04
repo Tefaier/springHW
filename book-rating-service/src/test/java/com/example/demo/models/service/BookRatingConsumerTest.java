@@ -1,5 +1,6 @@
 package com.example.demo.models.service;
 
+import com.example.demo.models.ObjectMapperTestConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -32,24 +33,13 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
     classes = {BookRatingConsumer.class},
     properties = {
         "topic-to-consume-message=some-test-topic",
-        "spring.kafka.consumer.group-id=some-consumer-group"
+        "spring.kafka.consumer.group-id=some-consumer-group",
+        "spring.kafka.consumer.auto-offset-reset=earliest"
     }
 )
-@Import({KafkaAutoConfiguration.class, BookRatingConsumerTest.ObjectMapperTestConfig.class})
+@Import({KafkaAutoConfiguration.class, ObjectMapperTestConfig.class})
 @Testcontainers
 class BookRatingConsumerTest {
-  @TestConfiguration
-  static class ObjectMapperTestConfig {
-    @Bean
-    public ObjectMapper objectMapper() {
-      return new ObjectMapper();
-    }
-  }
-
-  @DynamicPropertySource
-  static void overrideProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.kafka.consumer.auto-offset-reset", "earliest"::toString);
-  }
 
   @Container
   @ServiceConnection

@@ -2,6 +2,7 @@ package com.example.demo.models.gateway;
 
 import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
+import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.exceptions.BookRegistryFailException;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.github.resilience4j.springboot3.ratelimiter.autoconfigure.RateLimiterAutoConfiguration;
@@ -64,12 +65,12 @@ public class BookServiceRLGatewayTest {
     });
 
     assertDoesNotThrow(
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null, BuyStatus.NotBought), UUID.randomUUID().toString())
     );
     // limit was filled
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(2L, 1L, "book", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(2L, 1L, "book", null, null, BuyStatus.NotBought), UUID.randomUUID().toString())
     );
   }
 }
