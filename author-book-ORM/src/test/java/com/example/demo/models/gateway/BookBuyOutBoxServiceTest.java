@@ -4,7 +4,6 @@ import com.example.demo.models.DTO.BookBuyRequest;
 import com.example.demo.models.DTO.BookBuyResult;
 import com.example.demo.models.KafkaTestConsumer;
 import com.example.demo.models.ObjectMapperTestConfig;
-import com.example.demo.models.config.SchedulerConfig;
 import com.example.demo.models.entity.OutboxRecord;
 import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.repository.OutboxRepository;
@@ -17,12 +16,11 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -39,7 +37,7 @@ import static org.mockito.Mockito.when;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @SpringBootTest(
-    classes = {BookBuyOutBoxService.class, SchedulerConfig.class},
+    classes = {BookBuyOutBoxService.class},
     properties = {
         "topic-book-purchase-request=some-test-topic",
         "topic-book-purchase-result=some-test-topic-response",
@@ -48,6 +46,7 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
     })
 @Import({KafkaAutoConfiguration.class, ObjectMapperTestConfig.class})
 @Testcontainers
+@EnableScheduling
 public class BookBuyOutBoxServiceTest {
 
   @Container

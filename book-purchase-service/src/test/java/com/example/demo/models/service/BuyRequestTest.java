@@ -26,6 +26,8 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -57,6 +59,7 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 )
 @Import({KafkaAutoConfiguration.class, ObjectMapperTestConfig.class})
 @Testcontainers
+@EnableScheduling
 public class BuyRequestTest extends DBSuite {
 
   @Container
@@ -89,7 +92,7 @@ public class BuyRequestTest extends DBSuite {
       balanceRepository.delete(balanceRepository.findByIdForUpdate(BalanceServiceImpl.mainBalanceId).get());
     } catch (RuntimeException ignored) { }
     balanceRepository.save(new Balance(BalanceServiceImpl.mainBalanceId, 1000L));
-    outboxRepository.deleteAll();
+    //outboxRepository.deleteAll();
   }
 
   // test message come - balance update
@@ -97,11 +100,12 @@ public class BuyRequestTest extends DBSuite {
 
   // test message send to Kafka
   @Test
-  void outboxSendTest() throws JsonProcessingException {
+  void outboxSendTest() throws JsonProcessingException, InterruptedException {
     List<OutboxRecord> recordsToReturn = List.of(
         new OutboxRecord(objectMapper.writeValueAsString(new BookBuyResult(2L, Boolean.TRUE)))
     );
     outboxRepository.saveAll(recordsToReturn);
+    Thread.sleep(1500);
 
     // assert valid sending
     ConsumerRecords<String, String> records = consumer.poll();
@@ -133,7 +137,7 @@ public class BuyRequestTest extends DBSuite {
     kafkaTemplate.send("some-test-topic", objectMapper.writeValueAsString(buyRequests.get(0)));
     kafkaTemplate.send("some-test-topic", objectMapper.writeValueAsString(buyRequests.get(1)));
     // wait until message is received by consumer and processed by db
-    Thread.sleep(5000);
+    Thread.sleep(1500);
 
     Balance currentBalance = balanceRepository.findById(BalanceServiceImpl.mainBalanceId).get();
     assertEquals(900L, currentBalance.getValue());
