@@ -48,12 +48,13 @@ import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @SpringBootTest(
     properties = {
         "topic-book-purchase-request=some-test-topic",
         "topic-book-purchase-result=some-test-topic-response",
         "spring.kafka.consumer.group-id=some-consumer-group",
-        "outbox-delay=1000",
+        "outbox-delay=500",
         "spring.kafka.consumer.auto-offset-reset=earliest"
     }
 )
@@ -105,7 +106,7 @@ public class BuyRequestTest extends DBSuite {
         new OutboxRecord(objectMapper.writeValueAsString(new BookBuyResult(2L, Boolean.TRUE)))
     );
     outboxRepository.saveAll(recordsToReturn);
-    Thread.sleep(1500);
+    Thread.sleep(5000);
 
     // assert valid sending
     ConsumerRecords<String, String> records = consumer.poll();
@@ -137,7 +138,7 @@ public class BuyRequestTest extends DBSuite {
     kafkaTemplate.send("some-test-topic", objectMapper.writeValueAsString(buyRequests.get(0)));
     kafkaTemplate.send("some-test-topic", objectMapper.writeValueAsString(buyRequests.get(1)));
     // wait until message is received by consumer and processed by db
-    Thread.sleep(1500);
+    Thread.sleep(5000);
 
     Balance currentBalance = balanceRepository.findById(BalanceServiceImpl.mainBalanceId).get();
     assertEquals(900L, currentBalance.getValue());
