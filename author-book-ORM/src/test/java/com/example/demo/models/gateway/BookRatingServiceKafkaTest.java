@@ -3,6 +3,7 @@ package com.example.demo.models.gateway;
 import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookRatingResult;
 import com.example.demo.models.KafkaTestConsumer;
+import com.example.demo.models.ObjectMapperTestConfig;
 import com.example.demo.models.config.RestTemplateConfiguration;
 import com.example.demo.models.service.BookService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,20 +38,13 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @SpringBootTest(
     classes = {BookRatingServiceKafka.class},
     properties = {
-        "topic-to-send-message=some-test-topic",
-        "topic-to-consume-message=some-test-topic-response",
+        "topic-book-rating-request=some-test-topic",
+        "topic-book-rating-result=some-test-topic-response",
         "spring.kafka.consumer.group-id=some-consumer-group"
     })
-@Import({KafkaAutoConfiguration.class, BookRatingServiceKafkaTest.ObjectMapperTestConfig.class})
+@Import({KafkaAutoConfiguration.class, ObjectMapperTestConfig.class})
 @Testcontainers
 class BookRatingServiceKafkaTest {
-  @TestConfiguration
-  static class ObjectMapperTestConfig {
-    @Bean
-    public ObjectMapper objectMapper() {
-      return new ObjectMapper();
-    }
-  }
 
   @Container
   @ServiceConnection
@@ -88,7 +82,6 @@ class BookRatingServiceKafkaTest {
     );
   }
 
-  // FAILS
   @Test
   void shouldGetMessageFromKafkaSuccessfully() throws JsonProcessingException {
     kafkaTemplate.send("some-test-topic-response", objectMapper.writeValueAsString(new BookRatingResult(30L, 6.7f)));

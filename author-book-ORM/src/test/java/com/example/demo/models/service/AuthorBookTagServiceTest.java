@@ -2,6 +2,7 @@ package com.example.demo.models.service;
 
 import com.example.demo.models.DTO.*;
 import com.example.demo.models.DBSuite;
+import com.example.demo.models.ObjectMapperTestConfig;
 import com.example.demo.models.entity.ChangeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,13 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
@@ -25,9 +29,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({
-    AuthorServiceImpl.class, BookServiceImpl.class, TagServiceImpl.class
+    AuthorServiceImpl.class, BookServiceImpl.class, TagServiceImpl.class, ObjectMapperTestConfig.class
 })
 class AuthorBookTagServiceTest extends DBSuite {
+
   @Autowired
   private AuthorService authorService;
   @Autowired

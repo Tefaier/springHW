@@ -2,6 +2,7 @@ package com.example.demo.models.gateway;
 
 import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
+import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.exceptions.BookRegistryFailException;
 import com.example.demo.models.service.BookService;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
@@ -69,12 +70,12 @@ public class BookServiceCBGatewayTest {
     });
 
     assertDoesNotThrow(
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null, BuyStatus.NotBought), UUID.randomUUID().toString())
     );
     // slow response filled CB limit
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null, BuyStatus.NotBought), UUID.randomUUID().toString())
     );
   }
 
@@ -100,12 +101,12 @@ public class BookServiceCBGatewayTest {
 
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book", null, null, BuyStatus.NotBought), UUID.randomUUID().toString())
     );
     // CB rejects due to failed request before
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book2", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "book2", null, null, BuyStatus.NotBought), UUID.randomUUID().toString())
     );
   }
 }

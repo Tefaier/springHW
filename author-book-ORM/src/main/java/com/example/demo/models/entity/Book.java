@@ -2,6 +2,7 @@ package com.example.demo.models.entity;
 
 import com.example.demo.models.DTO.BookDTO;
 import com.example.demo.models.DTO.TagDTO;
+import com.example.demo.models.enums.BuyStatus;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -42,14 +43,20 @@ public class Book {
   @Fetch(FetchMode.SUBSELECT)
   private Set<Tag> tags = new HashSet<>();
 
+  @Column(name = "buy_status")
+  @Enumerated(EnumType.STRING)
+  @NotNull
+  private BuyStatus status;
+
   protected Book() {}
 
-  public Book (Author author, String title, Float rating, Set<Tag> tags) {
+  public Book (Author author, String title, Float rating, Set<Tag> tags, BuyStatus status) {
     this.id = null;
     this.author = author;
     this.title = title;
     this.rating = rating;
     this.tags = tags;
+    this.status = status;
   }
 
   public Long getId() {
@@ -102,6 +109,14 @@ public class Book {
     this.rating = rating;
   }
 
+  public BuyStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(BuyStatus status) {
+    this.status = status;
+  }
+
   @Override
   public final boolean equals(Object o) {
     if (this == o) return true;
@@ -126,6 +141,7 @@ public class Book {
         book.getRating(),
         withTags ?
             book.getTags().stream().map(Tag::getDTO).collect(Collectors.toSet()) :
-            new HashSet<>());
+            new HashSet<>(),
+        book.getStatus());
   }
 }

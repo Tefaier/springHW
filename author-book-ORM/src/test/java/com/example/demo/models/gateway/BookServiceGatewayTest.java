@@ -3,6 +3,7 @@ package com.example.demo.models.gateway;
 import com.example.demo.models.AuthorServiceMock;
 import com.example.demo.models.DTO.BookDTO;
 import com.example.demo.models.config.RestTemplateConfiguration;
+import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.exceptions.BookRegistryFailException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,10 +79,10 @@ class BookServiceGatewayTest {
 
     assertThrows(
         BookRegistryFailException.class,
-        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "1", null, null), UUID.randomUUID().toString())
+        () -> bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "1", null, null, BuyStatus.NotBought), UUID.randomUUID().toString())
     );
 
-    Boolean exists = bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "2", null, null), UUID.randomUUID().toString());
+    Boolean exists = bookServiceGateway.checkBookExists(new BookDTO(null, 1L, "2", null, null, BuyStatus.NotBought), UUID.randomUUID().toString());
     assertTrue(exists);
   }
 }

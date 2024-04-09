@@ -30,7 +30,7 @@ public class BookRatingServiceKafka implements BookRatingService {
   @Autowired
   public BookRatingServiceKafka(KafkaTemplate<String, String> kafkaTemplate,
                                 ObjectMapper objectMapper,
-                                @Value("${topic-to-send-message}") String topic) {
+                                @Value("${topic-book-rating-request}") String topic) {
     this.kafkaTemplate = kafkaTemplate;
     this.objectMapper = objectMapper;
     this.topic = topic;
@@ -45,7 +45,7 @@ public class BookRatingServiceKafka implements BookRatingService {
     }
   }
 
-  @KafkaListener(topics = {"${topic-to-consume-message}"})
+  @KafkaListener(topics = {"${topic-book-rating-result}"})
   public void onCheckRatingReceived(String message) {
     try {
       var result = objectMapper.readValue(message, BookRatingResult.class);

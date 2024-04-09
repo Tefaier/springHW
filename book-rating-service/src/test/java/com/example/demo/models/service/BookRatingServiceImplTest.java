@@ -2,6 +2,7 @@ package com.example.demo.models.service;
 
 import com.example.demo.models.DTO.BookRatingResult;
 import com.example.demo.models.KafkaTestConsumer;
+import com.example.demo.models.ObjectMapperTestConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -25,16 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(
     classes = {BookRatingServiceImpl.class},
     properties = {"topic-to-send-message=some-test-topic"})
-@Import({KafkaAutoConfiguration.class, BookRatingServiceImplTest.ObjectMapperTestConfig.class})
+@Import({KafkaAutoConfiguration.class, ObjectMapperTestConfig.class})
 @Testcontainers
 class BookRatingServiceImplTest {
-  @TestConfiguration
-  static class ObjectMapperTestConfig {
-    @Bean
-    public ObjectMapper objectMapper() {
-      return new ObjectMapper();
-    }
-  }
 
   @Container
   @ServiceConnection

@@ -1,6 +1,7 @@
 package com.example.demo.models.controller;
 
 import com.example.demo.models.DTO.BookDTO;
+import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.exceptions.BookRejectionException;
 import com.example.demo.models.gateway.BookRatingService;
 import com.example.demo.models.gateway.HttpBookServiceGateway;
@@ -22,6 +23,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -48,7 +50,7 @@ public class BookController {
   @PostMapping(path = "/add")
   public BookDTO createBook(@Valid @RequestBody BookRequest book) {
     if (!bookServiceGateway.checkBookExists(
-                new BookDTO(null, book.getAuthorID(), book.getTitle(), 0f, null),
+                new BookDTO(null, book.getAuthorID(), book.getTitle(), 0f, null, BuyStatus.NotBought),
                 UUID.randomUUID().toString())) {
       throw new BookRejectionException("Such a book wasn't verified", new RuntimeException());
     }
@@ -65,7 +67,8 @@ public class BookController {
                     update.getAuthorID() == null ? bookDTO.get().authorID() : update.getAuthorID(),
                     update.getTitle() == null ? bookDTO.get().title() : update.getTitle(),
                     0f,
-                    null),
+                    null,
+                    BuyStatus.NotBought),
                 UUID.randomUUID().toString())) {
       throw new BookRejectionException("Such a book wasn't verified or created", new RuntimeException());
     }
@@ -76,7 +79,7 @@ public class BookController {
   public void deleteBook(@NotNull @PathVariable("id") Long id) {
     Optional<BookDTO> bookDTO = bookService.getById(id, false);
     if (!bookServiceGateway.checkBookExists(
-            new BookDTO(null, bookDTO.get().authorID(), bookDTO.get().title(), 0f, null),
+            new BookDTO(null, bookDTO.get().authorID(), bookDTO.get().title(), 0f, null, BuyStatus.NotBought),
             UUID.randomUUID().toString())) {
       throw new BookRejectionException("Such a book wasn't verified or created", new RuntimeException());
     }
@@ -100,6 +103,17 @@ public class BookController {
   @PostMapping("/{bookId}:checkRating")
   public void checkRating(@PathVariable @NotNull Long bookId) {
     bookRatingService.checkRating(bookId);
+  }
+
+  @GetMapping("/buy/{bookId}")
+  public void buyBook(@PathVariable @NotNull Long bookId) {
+    try {
+      bookService.setBuyStatus(bookId, BuyStatus.PendingTransaction);
+    } catch (NoSuchElementException e) {
+      LOGGER.warn("An attempt to buy non existing book: " + bookId);
+    } catch (IllegalArgumentException e) {
+      LOGGER.warn("Wrong status when buying book: " + bookId + " existing status: " + bookService.getById(bookId, false).get().status());
+    }
   }
 
   @ExceptionHandler

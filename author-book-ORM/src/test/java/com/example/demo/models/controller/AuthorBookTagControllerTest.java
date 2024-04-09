@@ -2,35 +2,28 @@ package com.example.demo.models.controller;
 
 import com.example.demo.models.DBSuite;
 import com.example.demo.models.DTO.*;
-import com.example.demo.models.entity.Book;
 import com.example.demo.models.entity.ChangeType;
+import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.gateway.BookRatingService;
 import com.example.demo.models.gateway.HttpBookServiceGateway;
+import com.example.demo.models.repository.OutboxRepository;
 import com.example.demo.models.service.AuthorService;
 import com.example.demo.models.service.BookService;
 import com.example.demo.models.service.TagService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -42,7 +35,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
     webEnvironment = RANDOM_PORT,
     properties = {
         "author-registry.mode=stub",
-        "book-rating.mode=stub"
+        "book-rating.mode=stub",
+        "book-purchase.mode=stub"
     }
 )
 class AuthorBookTagControllerTest extends DBSuite {
@@ -55,6 +49,8 @@ class AuthorBookTagControllerTest extends DBSuite {
   private BookService bookService;
   @Autowired
   private TagService tagService;
+  @MockBean
+  private OutboxRepository outboxRepository;
   @MockBean
   private HttpBookServiceGateway bookServiceGateway;
   @MockBean
@@ -96,6 +92,10 @@ class AuthorBookTagControllerTest extends DBSuite {
 
   private void deleteBookRequest(Long id) {
     rest.delete("/api/books/" + id);
+  }
+
+  private void buyBookRequest(Long id) {
+    rest.getForEntity("/api/books/buy/{bookId}", null, Map.of("bookId", id));
   }
 
   private void ratingBookRequest(Long id) {
@@ -253,11 +253,11 @@ class AuthorBookTagControllerTest extends DBSuite {
 
     // book1 for author1, book2 for author2
     when(bookServiceGateway.checkBookExists(
-        refEq(new BookDTO(null, authorDTO1.getId(), "book1", 0f, null), "id", "tags", "rating"),
+        refEq(new BookDTO(null, authorDTO1.getId(), "book1", 0f, null, BuyStatus.NotBought), "id", "tags", "rating"),
         any())
     ).thenReturn(true);
     when(bookServiceGateway.checkBookExists(
-        refEq(new BookDTO(null, authorDTO2.getId(), "book2", 0f, null), "id", "tags", "rating"),
+        refEq(new BookDTO(null, authorDTO2.getId(), "book2", 0f, null, BuyStatus.NotBought), "id", "tags", "rating"),
         any())
     ).thenReturn(true);
 
@@ -287,5 +287,20 @@ class AuthorBookTagControllerTest extends DBSuite {
   void bookRatingRequestCheck() {
     ratingBookRequest(10L);
     verify(bookRatingService).checkRating(eq(10L));
+  }
+
+  @Test
+  void bookBuyRequestCheck() throws InterruptedException {
+    when(bookServiceGateway.checkBookExists(any(), any())).thenReturn(true);
+
+    var createAuthorRequest = createAuthorRequest(new AuthorRequest("Tefaier", "The great"));
+    AuthorDTO authorDTO = createAuthorRequest.getBody();
+    var createBookResponse = createBookRequest(new BookRequest(authorDTO.getId(), "protocol", null));
+    BookDTO bookDTO = createBookResponse.getBody();
+
+    buyBookRequest(bookDTO.id());
+    verify(outboxRepository).save(any());
+    var getBookResponse = getBookRequest(bookDTO.id(), false);
+    assertEquals(BuyStatus.PendingTransaction, getBookResponse.getBody().status());
   }
 }

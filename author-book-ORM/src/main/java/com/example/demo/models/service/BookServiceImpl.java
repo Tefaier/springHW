@@ -1,12 +1,18 @@
 package com.example.demo.models.service;
 
+import com.example.demo.models.DTO.BookBuyRequest;
 import com.example.demo.models.DTO.BookDTO;
 import com.example.demo.models.DTO.BookRequest;
 import com.example.demo.models.entity.Author;
 import com.example.demo.models.entity.Book;
+import com.example.demo.models.entity.OutboxRecord;
+import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.repository.AuthorRepository;
 import com.example.demo.models.repository.BookRepository;
+import com.example.demo.models.repository.OutboxRepository;
 import com.example.demo.models.repository.TagRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +22,22 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class BookServiceImpl implements BookService {
   Logger logger = LoggerFactory.getLogger(BookRepository.class);
+  @Autowired
+  private ObjectMapper objectMapper;
+
   @Autowired
   private AuthorRepository authorRepository;
   @Autowired
   private BookRepository bookRepository;
   @Autowired
   private TagRepository tagRepository;
+  @Autowired
+  private OutboxRepository outboxRepository;
 
   @Override
   @Transactional
@@ -56,7 +68,7 @@ public class BookServiceImpl implements BookService {
     return Book.getDTO(
         bookRepository.save(new Book(
             authorRepository.findById(request.getAuthorID()).orElseThrow(),
-            request.getTitle(), null, null)),
+            request.getTitle(), null, null, BuyStatus.NotBought)),
         false);
   }
 
@@ -103,5 +115,22 @@ public class BookServiceImpl implements BookService {
   public void delete(Long id) {
     Book book = bookRepository.findById(id).orElseThrow();
     bookRepository.delete(book);
+  }
+
+  @Override
+  @Transactional
+  public void setBuyStatus(Long id, BuyStatus status) {
+    Book book = bookRepository.findByIdWithLock(id).orElseThrow();
+    // check on illegal status change
+    if (status == BuyStatus.PendingTransaction && book.getStatus() != BuyStatus.NotBought) throw new IllegalArgumentException("Book can't be bought");
+    if (book.getStatus() == BuyStatus.Bought) throw new IllegalArgumentException("Book is already bought");
+
+    book.setStatus(BuyStatus.PendingTransaction);
+    bookRepository.save(book);
+    try {
+      outboxRepository.save(new OutboxRecord(objectMapper.writeValueAsString(new BookBuyRequest(UUID.randomUUID().toString(), book.getId(), 100L))));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to parse BookBuyRequest");
+    }
   }
 }
