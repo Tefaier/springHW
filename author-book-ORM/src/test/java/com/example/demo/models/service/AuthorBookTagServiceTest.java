@@ -59,8 +59,8 @@ class AuthorBookTagServiceTest extends DBSuite {
     books.clear();
     tags.clear();
 
-    authors.add(authorService.add(new AuthorRequest("name1", "surname1")));
-    authors.add(authorService.add(new AuthorRequest("name2", "surname2")));
+    authors.add(authorService.add(new AuthorRequest("name1", "surname1"), "test1"));
+    authors.add(authorService.add(new AuthorRequest("name2", "surname2"), "test2"));
 
     books.add(bookService.add(new BookRequest(authors.get(0).getId(), "book1", null)));
     books.add(bookService.add(new BookRequest(authors.get(1).getId(), "book2", null)));
