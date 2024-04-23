@@ -1,6 +1,6 @@
 package com.example.demo.models.DTO;
 
-import com.example.demo.models.entity.Role;
+import com.example.demo.models.enums.Role;
 
 import java.util.Set;
 

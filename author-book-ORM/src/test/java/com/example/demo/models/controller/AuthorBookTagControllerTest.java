@@ -2,7 +2,7 @@ package com.example.demo.models.controller;
 
 import com.example.demo.models.DBSuite;
 import com.example.demo.models.DTO.*;
-import com.example.demo.models.entity.ChangeType;
+import com.example.demo.models.enums.ChangeType;
 import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.gateway.BookRatingService;
 import com.example.demo.models.gateway.HttpBookServiceGateway;

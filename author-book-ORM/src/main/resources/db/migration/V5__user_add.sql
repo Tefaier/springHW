@@ -6,4 +6,4 @@ CREATE TABLE users
     roles    JSONB NOT NULL
 );
 
-ALTER TABLE authors ADD username TEXT NOT NULL UNIQUE;
+ALTER TABLE authors ADD username TEXT UNIQUE;

@@ -1,4 +1,4 @@
-package com.example.demo.models.entity;
+package com.example.demo.models.enums;
 
 public enum ChangeType {
   Add,

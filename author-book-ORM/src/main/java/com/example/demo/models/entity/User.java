@@ -1,5 +1,6 @@
 package com.example.demo.models.entity;
 
+import com.example.demo.models.enums.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;

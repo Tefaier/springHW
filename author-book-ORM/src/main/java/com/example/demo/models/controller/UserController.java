@@ -4,6 +4,7 @@ import com.example.demo.models.DTO.UserRegisterRequest;
 import com.example.demo.models.entity.User;
 import com.example.demo.models.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;

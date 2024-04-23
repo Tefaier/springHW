@@ -43,6 +43,11 @@ public class BookService {
             new Book("book"),
             new Book("also book")
         ));
+    authorSet.put(
+        new Author("protocol", "protocol"),
+        List.of(
+            new Book("best best")
+        ));
     return authorSet;
   }
 }
