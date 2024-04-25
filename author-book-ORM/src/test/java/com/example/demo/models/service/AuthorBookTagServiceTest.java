@@ -3,23 +3,15 @@ package com.example.demo.models.service;
 import com.example.demo.models.DTO.*;
 import com.example.demo.models.DBSuite;
 import com.example.demo.models.ObjectMapperTestConfig;
-import com.example.demo.models.entity.ChangeType;
+import com.example.demo.models.enums.ChangeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
@@ -59,8 +51,8 @@ class AuthorBookTagServiceTest extends DBSuite {
     books.clear();
     tags.clear();
 
-    authors.add(authorService.add(new AuthorRequest("name1", "surname1")));
-    authors.add(authorService.add(new AuthorRequest("name2", "surname2")));
+    authors.add(authorService.add(new AuthorRequest("name1", "surname1"), "test1"));
+    authors.add(authorService.add(new AuthorRequest("name2", "surname2"), "test2"));
 
     books.add(bookService.add(new BookRequest(authors.get(0).getId(), "book1", null)));
     books.add(bookService.add(new BookRequest(authors.get(1).getId(), "book2", null)));

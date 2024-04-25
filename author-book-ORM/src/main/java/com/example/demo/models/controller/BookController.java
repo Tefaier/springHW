@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/api/books")
 @Validated
+@PreAuthorize("isAuthenticated()")
 public class BookController {
   private static final Logger LOGGER = LoggerFactory.getLogger(BookController.class);
   @Autowired
@@ -48,6 +50,7 @@ public class BookController {
   }
 
   @PostMapping(path = "/add")
+  @PreAuthorize("@accessHandler.canCreateBook(authentication, #book.getAuthorID())")
   public BookDTO createBook(@Valid @RequestBody BookRequest book) {
     if (!bookServiceGateway.checkBookExists(
                 new BookDTO(null, book.getAuthorID(), book.getTitle(), 0f, null, BuyStatus.NotBought),
@@ -58,6 +61,7 @@ public class BookController {
   }
 
   @PutMapping("/{id}")
+  @PreAuthorize("@accessHandler.canAlterBook(authentication, #id)")
   public BookDTO updateBook(@NotNull @PathVariable("id") Long id,
                          @Valid @RequestBody BookRequest update) {
     Optional<BookDTO> bookDTO = bookService.getById(id, false);
@@ -76,6 +80,7 @@ public class BookController {
   }
 
   @DeleteMapping("/{id}")
+  @PreAuthorize("@accessHandler.canAlterBook(authentication, #id)")
   public void deleteBook(@NotNull @PathVariable("id") Long id) {
     Optional<BookDTO> bookDTO = bookService.getById(id, false);
     if (!bookServiceGateway.checkBookExists(

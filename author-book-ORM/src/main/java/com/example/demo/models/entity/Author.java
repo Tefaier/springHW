@@ -22,6 +22,10 @@ public class Author {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(name = "username")
+  @NotNull
+  private String username;
+
   @Column(name = "first_name")
   @NotNull
   private String firstName;
@@ -36,7 +40,8 @@ public class Author {
 
   protected Author () {}
 
-  public Author(String firstName, String lastName, List<Book> books) {
+  public Author(String username, String firstName, String lastName, List<Book> books) {
+    this.username = username;
     this.firstName = firstName;
     this.lastName = lastName;
     this.books = books;
@@ -48,6 +53,14 @@ public class Author {
 
   protected void setId(Long id) {
     this.id = id;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
   }
 
   public String getFirstName() {

@@ -1,7 +1,6 @@
 package com.example.demo.models.DTO;
 
-import com.example.demo.models.entity.ChangeType;
-import jakarta.validation.constraints.Min;
+import com.example.demo.models.enums.ChangeType;
 import jakarta.validation.constraints.Size;
 
 import java.util.HashMap;

@@ -2,9 +2,11 @@ package com.example.demo.models.gateway;
 
 import com.example.demo.models.DTO.BookBuyRequest;
 import com.example.demo.models.DTO.BookBuyResult;
+import com.example.demo.models.DTO.UserRegisterRequest;
 import com.example.demo.models.KafkaTestConsumer;
 import com.example.demo.models.ObjectMapperTestConfig;
 import com.example.demo.models.entity.OutboxRecord;
+import com.example.demo.models.enums.Role;
 import com.example.demo.models.enums.BuyStatus;
 import com.example.demo.models.repository.OutboxRepository;
 import com.example.demo.models.service.BookService;
@@ -29,6 +31,7 @@ import org.testcontainers.utility.DockerImageName;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -63,6 +66,14 @@ public class BookBuyOutBoxServiceTest {
   private KafkaTemplate<String, String> kafkaTemplate;
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Test
+  void parseTest() throws JsonProcessingException {
+    var val = objectMapper.writeValueAsString(new UserRegisterRequest("some", "pas", Set.of(Role.ADMIN)));
+    System.out.println(val);
+    var parsed = objectMapper.readValue(val, UserRegisterRequest.class);
+    System.out.println(parsed);
+  }
 
   @Test
   void shouldSendMessageToKafkaSuccessfully() throws JsonProcessingException {
